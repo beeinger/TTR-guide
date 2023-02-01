@@ -1,18 +1,13 @@
 import styled from "@emotion/styled";
 import Link from "next/link";
 import { BsGithub } from "react-icons/bs";
+import { description } from "./_document";
 
 export default function IndexPage() {
   return (
     <>
       <Title>Tools and Technologies Research guide</Title>
-      <Subtitle>
-        An all in one platform empowering users with powerful visualisations and
-        analytics for better, informed choice of tools and technologies. Whether
-        you're thinking what to learn, teach or just use, here you will be able
-        to find answers based on data coming straight from job posts, from what
-        the industry needs and uses.
-      </Subtitle>
+      <Subtitle>{description}</Subtitle>
       <Footer>
         Developed by{" "}
         <Link href="https://github.com/beeinger" target="_blank">
