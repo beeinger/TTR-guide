@@ -1,8 +1,8 @@
-const title = "TTR Guide - Tools and Technologies Research guide",
+export const title = "TTR Guide - Tools and Technologies Research guide",
   keywords = "TTR, Tools, Technologies, Research, guide, TTR.Guide",
   name = "TTR Guide",
   description =
-    "An all in one platform empowering users with powerful visualisations and analytics for better, informed choice of tools and technologies. Whether you're thinking what to learn, teach or just use, here you will be able to find answers based on data coming straight from job posts, from what the industry needs and uses.";
+    "An all in one platform empowering users with powerful visualisations and analytics for better, informed choice of tools and technologies. Whether you're considering what to learn, teach or just use, here, you will be able to find answers based on data coming straight from job posts, from what the industry needs and uses.";
 
 import Document, {
   DocumentContext,
