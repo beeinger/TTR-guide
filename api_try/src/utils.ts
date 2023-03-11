@@ -1,7 +1,7 @@
 import axios from "axios";
 import { JobPost, JobPostWithDetails } from "./types";
 
-export const API_KEY = "8dc12dda-72e6-4524-a915-2cd48f9d0ee2";
+export const API_KEY = "9ecd64ab-170f-472b-b3f2-20c37e84605c";
 
 export const MAX_RESULTS_PER_PAGE = 100;
 
@@ -43,3 +43,11 @@ export const getJobDetails = async (
 
   return result.data;
 };
+
+(async () => {
+  const jobs = await getJobPosts();
+  console.log(jobs);
+
+  const jobDetails = await getJobDetails(jobs.results[0].jobId);
+  console.log(jobDetails);
+})();

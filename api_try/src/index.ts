@@ -6,8 +6,7 @@ const main = async () => {
   const data = await getJobPosts();
 
   let alreadyGot = 100;
-  // const total = data.totalResults;
-  const total = 200;
+  const total = alreadyGot * 20;
 
   console.log("Total results: " + total);
 
@@ -16,12 +15,15 @@ const main = async () => {
 
   const jobs = await (
     await Promise.all(requests.map((skip) => getJobPosts(skip)))
-  ).reduce<JobPost[]>((acc, val) => [...acc, ...val.results], []);
+  ).reduce<JobPost[]>(
+    (acc, val) => [...acc, ...val.results],
+    [...data.results]
+  );
 
   console.log("Got ", data.results.length, " job posts");
 
   const detailedJobs = await Promise.all(
-    jobs.map((jobPost) => getJobDetails(jobPost.jobId))
+    jobs.slice(0, 2000 - 20).map((jobPost) => getJobDetails(jobPost.jobId))
   );
 
   console.log("Got " + detailedJobs.length, " job posts with details");
@@ -31,3 +33,5 @@ const main = async () => {
     console.log("Saved!");
   });
 };
+
+main();
