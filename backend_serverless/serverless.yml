@@ -18,11 +18,18 @@ functions:
     # handler value syntax is `{cargo-package-name}.{bin-name}`
     # or `{cargo-package-name}` for short when you are building a
     # default bin for a given package.
-    handler: hello_world
+    handler: api.hello-world
     events:
       - http:
           path: hello
           method: get
+          cors: true
+  json_try:
+    handler: api.json-try
+    events:
+      - http:
+          path: json
+          method: post
           cors: true
 
 custom:
