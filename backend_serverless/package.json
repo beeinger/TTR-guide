@@ -1,0 +1,11 @@
+{
+  "name": "backend",
+  "scripts": {
+    "dev:rust": "cargo lambda watch",
+    "deploy": "serverless deploy"
+  },
+  "devDependencies": {
+    "serverless": "^3.28.1",
+    "serverless-rust": "^0.3.8"
+  }
+}

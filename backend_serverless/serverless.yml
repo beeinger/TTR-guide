@@ -1,0 +1,30 @@
+service: backend
+configValidationMode: warn
+provider:
+  name: aws
+  runtime: rust
+  memorySize: 128
+  stage: dev
+  region: eu-west-2
+
+package:
+  individually: true
+
+plugins:
+  - serverless-rust
+
+functions:
+  hello:
+    # handler value syntax is `{cargo-package-name}.{bin-name}`
+    # or `{cargo-package-name}` for short when you are building a
+    # default bin for a given package.
+    handler: hello_world
+    events:
+      - http:
+          path: hello
+          method: get
+          cors: true
+
+custom:
+  rust:
+    dockerless: true
