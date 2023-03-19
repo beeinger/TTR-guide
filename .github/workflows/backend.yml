@@ -40,7 +40,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Test
-        run: cd backend && cargo test
+        run: |
+        cd backend
+        echo ${{ secrets.ENV_FILE }} > .env
+        cargo test
   # deploy on pushes to master branch
   # assumes aws credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
   # are configured in travis settings
@@ -63,5 +66,6 @@ jobs:
           AWS_DEFAULT_REGION: eu-west-2
         run: |
           cd backend
+          echo ${{ secrets.ENV_FILE }} > .env
           yarn install --frozen-lockfile
           yarn sls deploy --conceal --stage prod
