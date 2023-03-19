@@ -67,6 +67,9 @@ jobs:
         run: |
           cd backend
           echo ${{ secrets.ENV_FILE }} > .env
-          yarn install --frozen-lockfile
+          sudo apt-get install musl-tools
+          export CC_x86_64_unknown_linux_musl=musl-gcc
+          export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=musl-gcc
           rustup target add x86_64-unknown-linux-musl
+          yarn install --frozen-lockfile
           yarn sls deploy --conceal --stage prod
