@@ -41,9 +41,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Test
         run: |
-        cd backend
-        echo ${{ secrets.ENV_FILE }} > .env
-        cargo test
+          cd backend
+          echo ${{ secrets.ENV_FILE }} > .env
+          cargo test
   # deploy on pushes to master branch
   # assumes aws credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
   # are configured in travis settings
