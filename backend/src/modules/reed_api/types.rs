@@ -1,0 +1,51 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct JobDetails {
+    pub employer_id: u32,
+    pub job_id: u32,
+    pub employer_name: Option<String>,
+    pub job_title: Option<String>,
+    pub location_name: Option<String>,
+    pub minimum_salary: Option<f32>,
+    pub maximum_salary: Option<f32>,
+    pub yearly_minimum_salary: Option<f32>,
+    pub yearly_maximum_salary: Option<f32>,
+    pub currency: Option<String>,
+    pub salary_type: Option<String>,
+    pub salary: Option<String>,
+    pub date_posted: Option<String>,
+    pub expiration_date: Option<String>,
+    pub external_url: Option<String>,
+    pub job_url: String,
+    pub part_time: Option<bool>,
+    pub full_time: Option<bool>,
+    pub contract_type: Option<String>,
+    pub job_description: Option<String>,
+    pub application_count: Option<u32>,
+}
+
+pub const DEFAULT_JOB_DETAILS: JobDetails = JobDetails {
+    employer_id: 0,
+    job_id: 0,
+    employer_name: None,
+    job_title: None,
+    location_name: None,
+    minimum_salary: None,
+    maximum_salary: None,
+    yearly_minimum_salary: None,
+    yearly_maximum_salary: None,
+    currency: None,
+    salary_type: None,
+    salary: None,
+    date_posted: None,
+    expiration_date: None,
+    external_url: None,
+    job_url: String::new(),
+    part_time: None,
+    full_time: None,
+    contract_type: None,
+    job_description: None,
+    application_count: None,
+};
