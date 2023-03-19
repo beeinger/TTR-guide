@@ -7,7 +7,7 @@ use serde::Deserialize;
 /// There are some code example in the following URLs:
 /// - https://github.com/awslabs/aws-lambda-rust-runtime/tree/main/examples
 async fn function_handler(_event: LambdaEvent<IgnoreEvent>) -> Result<String, Error> {
-    let job_details = reed_api::get_job_details(0)?;
+    let job_details = reed_api::types::DEFAULT_JOB_DETAILS;
     tracing::info!("{}", serde_json::to_string(&job_details).unwrap());
 
     Ok("Success".to_string())
