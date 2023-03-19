@@ -31,6 +31,10 @@ functions:
           path: json
           method: post
           cors: true
+  data_collector:
+    handler: api.data-collector
+    events:
+      - schedule: rate(12 hours)
 
 custom:
   rust:
