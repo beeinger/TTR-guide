@@ -1,9 +1,24 @@
 #[tokio::test]
 #[tracing_test::traced_test]
 pub async fn get_job_details() {
-    let job_details = crate::modules::reed_api::get_job_details(49731603)
-        .await
-        .unwrap();
+    use crate::modules::reed_api;
+
+    let job_details = reed_api::get_job_details(49731603).await.unwrap();
     tracing::info!("{:?}", job_details);
-    assert!(job_details.job_id == 49731603);
+    assert_eq!(job_details.job_id, 49731603);
+}
+
+#[tokio::test]
+#[tracing_test::traced_test]
+pub async fn get_jobs_previews() {
+    use crate::modules::reed_api;
+
+    let job_previews = reed_api::get_jobs_previews(None).await.unwrap();
+    tracing::info!("{:?}", job_previews);
+    assert_eq!(job_previews.len(), 100);
+
+    let job_previews_2 = reed_api::get_jobs_previews(Some(99)).await.unwrap();
+    tracing::info!("{:?}", job_previews_2);
+    assert_eq!(job_previews.last(), job_previews_2.first());
+    assert_eq!(job_previews_2.len(), 100);
 }

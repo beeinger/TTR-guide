@@ -26,26 +26,30 @@ pub struct JobDetails {
     pub application_count: Option<u32>,
 }
 
-pub const DEFAULT_JOB_DETAILS: JobDetails = JobDetails {
-    employer_id: 0,
-    job_id: 0,
-    employer_name: None,
-    job_title: None,
-    location_name: None,
-    minimum_salary: None,
-    maximum_salary: None,
-    yearly_minimum_salary: None,
-    yearly_maximum_salary: None,
-    currency: None,
-    salary_type: None,
-    salary: None,
-    date_posted: None,
-    expiration_date: None,
-    external_url: None,
-    job_url: String::new(),
-    part_time: None,
-    full_time: None,
-    contract_type: None,
-    job_description: None,
-    application_count: None,
-};
+#[derive(Deserialize, Serialize, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct JobPreview {
+    pub job_id: u32,
+    pub employer_id: u32,
+    pub employer_name: Option<String>,
+    pub employer_profile_id: Option<u32>,
+    pub employer_profile_name: Option<String>,
+    pub job_title: Option<String>,
+    pub location_name: Option<String>,
+    pub minimum_salary: Option<f32>,
+    pub maximum_salary: Option<f32>,
+    pub currency: Option<String>,
+    pub expiration_date: Option<String>,
+    pub date: Option<String>,
+    pub job_description: Option<String>,
+    pub applications: Option<u32>,
+    pub job_url: String,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct JobSearchResult {
+    pub results: Vec<JobPreview>,
+    pub total_results: u32,
+    pub ambiguous_locations: Vec<String>,
+}
