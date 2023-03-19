@@ -16,3 +16,7 @@ d-invoke:
 	@sls invoke
 d-invoke-data-collector: 
 	@sls invoke -f data_collector -d "{}"
+
+#? Running tests
+test:
+	@cargo test
