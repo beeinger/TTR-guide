@@ -3,12 +3,6 @@ name = "api"
 version = "0.1.0"
 edition = "2018"
 
-[[bin]]
-name = "hello-world"
-
-[[bin]]
-name = "json-try"
-
 [dependencies]
 lambda_http = "0.7"
 lambda_runtime = "0.7"
