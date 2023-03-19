@@ -1,4 +1,4 @@
-name: Main
+name: Backend
 
 on: push
 
@@ -11,7 +11,7 @@ jobs:
         with:
           components: rustfmt
       - uses: actions/checkout@v2
-      - run: cargo fmt --all -- --check
+      - run: cd backend && cargo fmt --all -- --check
 
   lint:
     runs-on: ubuntu-latest
@@ -21,7 +21,7 @@ jobs:
         with:
           components: clippy
       - uses: actions/checkout@v2
-      - run: cargo clippy --all-targets -- -D clippy::all
+      - run: cd backend && cargo clippy --all-targets -- -D clippy::all
 
   compile:
     runs-on: ubuntu-latest
@@ -29,7 +29,7 @@ jobs:
       - name: Set up Rust
         uses: hecrj/setup-rust-action@v1
       - uses: actions/checkout@v2
-      - run: cargo check --all
+      - run: cd backend && cargo check --all
 
   test:
     needs: [codestyle, lint, compile]
@@ -40,7 +40,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Test
-        run: cargo test
+        run: cd backend && cargo test
   # deploy on pushes to master branch
   # assumes aws credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
   # are configured in travis settings
@@ -62,5 +62,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: eu-west-2
         run: |
+          cd backend
           yarn install --frozen-lockfile
           yarn sls deploy --conceal --stage prod
