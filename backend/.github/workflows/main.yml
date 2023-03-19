@@ -35,12 +35,12 @@ jobs:
     needs: [codestyle, lint, compile]
     runs-on: ubuntu-latest
     steps:
-    - name: Setup Rust
-      uses: hecrj/setup-rust-action@v1
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Test
-      run: cargo test
+      - name: Setup Rust
+        uses: hecrj/setup-rust-action@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Test
+        run: cargo test
   # deploy on pushes to master branch
   # assumes aws credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
   # are configured in travis settings
@@ -60,8 +60,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
-          #STAGE: prod
+          AWS_DEFAULT_REGION: eu-west-2
         run: |
-          npm install
-          npx serverless deploy --conceal
+          yarn install --frozen-lockfile
+          yarn sls deploy --conceal --stage prod
