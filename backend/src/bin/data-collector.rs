@@ -1,4 +1,3 @@
-use api::modules::reed_api;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::Deserialize;
 
@@ -7,7 +6,7 @@ use serde::Deserialize;
 /// There are some code example in the following URLs:
 /// - https://github.com/awslabs/aws-lambda-rust-runtime/tree/main/examples
 async fn function_handler(_event: LambdaEvent<IgnoreEvent>) -> Result<String, Error> {
-    let job_details = reed_api::types::DEFAULT_JOB_DETAILS;
+    let job_details = "Hello, world!".to_string();
     tracing::info!("{}", serde_json::to_string(&job_details).unwrap());
 
     Ok("Success".to_string())
