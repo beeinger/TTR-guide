@@ -61,7 +61,7 @@ resources:
     JobPostsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: job_posts
+        TableName: "${self:provider.stage}-job-posts"
         AttributeDefinitions:
           - AttributeName: jobId
             AttributeType: N
