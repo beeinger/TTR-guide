@@ -4,14 +4,34 @@ provider:
   name: aws
   runtime: rust
   memorySize: 128
+  timeout: 20
   stage: dev
   region: eu-west-2
+  environment:
+    TABLE_NAME:
+      Ref: JobPostsTable
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:BatchWriteItem
+          Resource:
+            - "Fn::GetAtt": [JobPostsTable, Arn]
 
 package:
   individually: true
 
 plugins:
   - serverless-rust
+  - serverless-dotenv-plugin
 
 functions:
   hello:
@@ -35,6 +55,22 @@ functions:
     handler: api.data-collector
     events:
       - schedule: rate(12 hours)
+
+resources:
+  Resources:
+    JobPostsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: job_posts
+        AttributeDefinitions:
+          - AttributeName: jobId
+            AttributeType: N
+        KeySchema:
+          - AttributeName: jobId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
 custom:
   rust:

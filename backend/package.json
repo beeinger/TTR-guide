@@ -2,5 +2,8 @@
   "devDependencies": {
     "serverless": "^3.28.1",
     "serverless-rust": "^0.3.8"
+  },
+  "dependencies": {
+    "serverless-dotenv-plugin": "^6.0.0"
   }
 }

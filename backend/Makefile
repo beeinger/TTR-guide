@@ -9,6 +9,8 @@ deploy:
 	@sls deploy
 d-invoke-data-collector: 
 	@sls invoke -f data_collector -d "{}"
+d-logs-data-collector:
+	@sls logs -f data_collector
 
 #? Running tests
 test:

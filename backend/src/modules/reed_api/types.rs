@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 pub struct JobDetails {
     pub employer_id: u32,
-    pub job_id: u32,
+    pub job_id: i64,
     pub employer_name: Option<String>,
     pub job_title: Option<String>,
     pub location_name: Option<String>,
