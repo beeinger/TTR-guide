@@ -1,4 +1,4 @@
-use super::reed_api::types::JobDetails;
+use super::{config::Config, reed_api::types::JobDetails};
 use futures::future::join_all;
 use rusoto_core::{Region, RusotoError};
 use rusoto_dynamodb::{
@@ -11,7 +11,6 @@ pub async fn put_many_job_posts(
     job_posts: Vec<JobDetails>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let client = DynamoDbClient::new(Region::EuWest2);
-    let table_name = std::env::var("TABLE_NAME").unwrap();
     let chunks = job_posts.chunks(25);
 
     let tasks = chunks.map(|chunk| {
@@ -26,7 +25,7 @@ pub async fn put_many_job_posts(
             })
             .collect();
 
-        let request_items = [(table_name.to_string(), put_requests)]
+        let request_items = [(Config::from_env().table_name, put_requests)]
             .iter()
             .cloned()
             .collect();
@@ -61,7 +60,6 @@ pub async fn put_many_job_posts(
 
 pub async fn item_exists(job_id: i64) -> Result<bool, RusotoError<GetItemError>> {
     let client = DynamoDbClient::new(Region::EuWest2);
-    let table_name = std::env::var("TABLE_NAME").unwrap();
     let mut key = HashMap::new();
     key.insert(
         "jobId".to_string(),
@@ -71,7 +69,7 @@ pub async fn item_exists(job_id: i64) -> Result<bool, RusotoError<GetItemError>>
         },
     );
     let input = GetItemInput {
-        table_name,
+        table_name: Config::from_env().table_name,
         key,
         ..Default::default()
     };
@@ -85,7 +83,6 @@ pub async fn filter_existing_items(
     job_ids: Vec<i64>,
 ) -> Result<Vec<i64>, Box<dyn std::error::Error>> {
     let client = DynamoDbClient::new(Region::EuWest2);
-    let table_name = std::env::var("TABLE_NAME").unwrap();
     let max_batch_size = 100;
 
     let mut existing_ids = Vec::new();
@@ -105,7 +102,7 @@ pub async fn filter_existing_items(
         }
 
         let request_items = vec![(
-            table_name.clone(),
+            Config::from_env().table_name,
             KeysAndAttributes {
                 keys,
                 ..Default::default()
@@ -121,7 +118,10 @@ pub async fn filter_existing_items(
 
         let response = client.batch_get_item(input).await?;
 
-        if let Some(items) = response.responses.and_then(|mut r| r.remove(&table_name)) {
+        if let Some(items) = response
+            .responses
+            .and_then(|mut r| r.remove(&Config::from_env().reed_api_key))
+        {
             for item in items {
                 if let Some(id_attr) = item.get("job_id") {
                     if let Some(id_str) = &id_attr.n {
