@@ -15,10 +15,10 @@ pub async fn get_jobs_previews() {
 
     let job_previews = reed_api::get_jobs_previews(None).await.unwrap();
     tracing::info!("{:?}", job_previews);
-    assert_eq!(job_previews.len(), 100);
+    assert_eq!(job_previews.results.len(), 100);
 
     let job_previews_2 = reed_api::get_jobs_previews(Some(99)).await.unwrap();
     tracing::info!("{:?}", job_previews_2);
-    assert_eq!(job_previews.last(), job_previews_2.first());
-    assert_eq!(job_previews_2.len(), 100);
+    assert_eq!(job_previews.results.last(), job_previews_2.results.first());
+    assert_eq!(job_previews_2.results.len(), 100);
 }

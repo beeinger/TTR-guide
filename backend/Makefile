@@ -6,11 +6,11 @@ invoke-data-collector:
 	
 #? Deploying to AWS
 deploy:
-	@sls deploy
+	@sls deploy --stage dev
 d-invoke-data-collector: 
-	@sls invoke -f data_collector -d "{}"
+	@sls invoke -f data_collector -d "{}" --stage dev
 d-logs-data-collector:
-	@sls logs -f data_collector
+	@sls logs -f data_collector --stage dev
 
 #? Running tests
 test:
