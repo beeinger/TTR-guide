@@ -1,23 +1,48 @@
 use html2text::from_read;
 use regex::Regex;
+use rust_stemmers::{Algorithm, Stemmer};
 use std::error::Error;
+use stop_words::{get, LANGUAGE};
 
 pub fn preprocess(job_description: &str) -> Result<String, Box<dyn Error>> {
     let mut result = job_description.to_string();
 
     result = strip_html(&result)?;
     result = combine_sentences(&result)?;
+    result = remove_urls(&result)?;
+    result = remove_emails(&result)?;
+    result = remove_number_words(&result)?;
+
     result = abbreviate_common_phrases(&result)?;
     result = use_contractions(&result)?;
     result = remove_unnecessary_words(&result)?;
-    result = remove_urls(&result)?;
-    result = remove_emails(&result)?;
-    result = experimental_shorten_words(&result)?;
-    result = remove_number_words(&result)?;
+
+    result = stop_words_and_stemming(&result)?;
     result = strip_special_chars(&result)?;
+
     result = remove_unnecessary_spaces(&result)?;
 
     Ok(result)
+}
+
+fn stop_words_and_stemming(text: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let stop_words = get(LANGUAGE::English);
+    let exclusions = ["full"];
+
+    let re = Regex::new(r"\b\w+\b")?;
+    let en_stemmer = Stemmer::create(Algorithm::English);
+    let mut result = String::new();
+
+    for word in re.find_iter(text) {
+        let word_str = word.as_str().to_lowercase();
+        if exclusions.contains(&word_str.as_str()) || !stop_words.contains(&word_str) {
+            let stemmed = en_stemmer.stem(&word_str);
+            result.push_str(&stemmed);
+            result.push(' ');
+        }
+    }
+
+    Ok(result.trim().to_string())
 }
 
 fn strip_html(text: &str) -> Result<String, String> {
@@ -186,36 +211,6 @@ fn remove_emails(text: &str) -> Result<String, String> {
     let re = regex::Regex::new(r"\b[\w\.-]+@[\w\.-]+\.\w{2,}\b").unwrap();
     let result = re.replace_all(text, "");
     Ok(result.to_string())
-}
-
-fn experimental_shorten_words(job_description: &str) -> Result<String, String> {
-    let replacements = [
-        (r"\band\b", "&"),
-        (r"\bwith\b", "w/"),
-        (r"\bto\b", "2"),
-        (r"\bfor\b", "4"),
-        (r"\byou\b", "u"),
-        (r"\bare\b", "r"),
-        (r"\byour\b", "ur"),
-        (r"\bsome\b", "sm"),
-        (r"\bone\b", "1"),
-        (r"\btwo\b", "2"),
-        (r"\bthree\b", "3"),
-        (r"\bfour\b", "4"),
-        (r"\bfive\b", "5"),
-        (r"\bsix\b", "6"),
-        (r"\bseven\b", "7"),
-        (r"\beight\b", "8"),
-        (r"\bnine\b", "9"),
-        (r"\bten\b", "10"),
-    ];
-
-    let mut result = job_description.clone().to_string();
-    for (key, value) in replacements {
-        result = result.replace(key, value);
-    }
-
-    Ok(result.trim().to_string())
 }
 
 fn remove_unnecessary_spaces(job_description: &str) -> Result<String, String> {

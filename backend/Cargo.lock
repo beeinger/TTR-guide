@@ -33,9 +33,11 @@ dependencies = [
  "reqwest",
  "rusoto_core",
  "rusoto_dynamodb",
+ "rust-stemmers",
  "serde",
  "serde_dynamodb",
  "serde_json",
+ "stop-words",
  "tokio",
  "tracing",
  "tracing-subscriber",
@@ -1274,6 +1276,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "rust-stemmers"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e46a2036019fdb888131db7a4c847a1063a7493f971ed94ea82c67eada63ca54"
+dependencies = [
+ "serde",
+ "serde_derive",
+]
+
+[[package]]
 name = "rustc_version"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1531,6 +1543,15 @@ name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
+
+[[package]]
+name = "stop-words"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b251c7ff1e2170ea6b8437da108af444194381dd658c738d763c4ead03acd88d"
+dependencies = [
+ "serde_json",
+]
 
 [[package]]
 name = "string_cache"
