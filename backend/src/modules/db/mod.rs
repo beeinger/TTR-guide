@@ -1,4 +1,4 @@
-use super::{config::Config, reed_api::types::JobDetails};
+use super::{config, reed_api::types::JobDetails};
 use futures::future::join_all;
 use rusoto_core::{Region, RusotoError};
 use rusoto_dynamodb::{
@@ -25,7 +25,7 @@ pub async fn put_many_job_posts(
             })
             .collect();
 
-        let request_items = [(Config::from_env().table_name, put_requests)]
+        let request_items = [(config::get_table_name(), put_requests)]
             .iter()
             .cloned()
             .collect();
@@ -69,7 +69,7 @@ pub async fn item_exists(job_id: i64) -> Result<bool, RusotoError<GetItemError>>
         },
     );
     let input = GetItemInput {
-        table_name: Config::from_env().table_name,
+        table_name: config::get_table_name(),
         key,
         ..Default::default()
     };
@@ -102,7 +102,7 @@ pub async fn filter_existing_items(
         }
 
         let request_items = vec![(
-            Config::from_env().table_name,
+            config::get_table_name(),
             KeysAndAttributes {
                 keys,
                 ..Default::default()
@@ -120,7 +120,7 @@ pub async fn filter_existing_items(
 
         if let Some(items) = response
             .responses
-            .and_then(|mut r| r.remove(&Config::from_env().reed_api_key))
+            .and_then(|mut r| r.remove(&config::get_table_name()))
         {
             for item in items {
                 if let Some(id_attr) = item.get("job_id") {

@@ -1,5 +1,5 @@
 use self::types::{JobDetails, JobSearchResult};
-use super::config::Config;
+use super::config;
 
 pub mod types;
 
@@ -8,7 +8,7 @@ pub async fn get_job_details(job_id: i64) -> Result<JobDetails, Box<dyn std::err
     let client = reqwest::Client::new();
     let response = client
         .get(&url)
-        .basic_auth(Config::from_env().reed_api_key, Option::<&str>::None)
+        .basic_auth(config::get_reed_api_key(), Option::<&str>::None)
         .send()
         .await?;
 
@@ -30,7 +30,7 @@ pub async fn get_jobs_previews(
     let client = reqwest::Client::new();
     let response = client
         .get(url)
-        .basic_auth(Config::from_env().reed_api_key, Option::<&str>::None)
+        .basic_auth(config::get_reed_api_key(), Option::<&str>::None)
         .send()
         .await?;
 
