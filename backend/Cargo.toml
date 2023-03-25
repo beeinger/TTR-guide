@@ -18,3 +18,5 @@ rusoto_dynamodb = { version = "0.47", default-features = false, features = ["rus
 serde_json = "1.0"
 reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
 dotenv = "0.15.0"
+regex = "1.7.3"
+html2text = "0.5.0"
