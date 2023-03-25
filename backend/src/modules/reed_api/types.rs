@@ -29,7 +29,7 @@ pub struct JobDetails {
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct JobPreview {
-    pub job_id: u32,
+    pub job_id: i64,
     pub employer_id: u32,
     pub employer_name: Option<String>,
     pub employer_profile_id: Option<u32>,

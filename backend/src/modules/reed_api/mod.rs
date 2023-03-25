@@ -1,9 +1,9 @@
-use self::types::{JobDetails, JobPreview, JobSearchResult};
+use self::types::{JobDetails, JobSearchResult};
 use super::config::Config;
 
 pub mod types;
 
-pub async fn get_job_details(job_id: u32) -> Result<JobDetails, Box<dyn std::error::Error>> {
+pub async fn get_job_details(job_id: i64) -> Result<JobDetails, Box<dyn std::error::Error>> {
     let url = format!("https://www.reed.co.uk/api/1.0/jobs/{}", job_id);
     let client = reqwest::Client::new();
     let response = client
@@ -21,7 +21,7 @@ pub async fn get_job_details(job_id: u32) -> Result<JobDetails, Box<dyn std::err
 
 pub async fn get_jobs_previews(
     skip_first: Option<u32>,
-) -> Result<Vec<JobPreview>, Box<dyn std::error::Error>> {
+) -> Result<JobSearchResult, Box<dyn std::error::Error>> {
     let url = format!(
         "https://www.reed.co.uk/api/1.0/search?keywords={}&resultsToSkip={}",
         "frontend",
@@ -39,5 +39,6 @@ pub async fn get_jobs_previews(
     }
 
     let search_result: JobSearchResult = response.json().await?;
-    Ok(search_result.results)
+    tracing::info!("Search result: {:?}", search_result);
+    Ok(search_result)
 }
