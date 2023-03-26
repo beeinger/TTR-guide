@@ -123,7 +123,8 @@ pub async fn filter_existing_items(
             .and_then(|mut r| r.remove(&config::get_table_name()))
         {
             for item in items {
-                if let Some(id_attr) = item.get("job_id") {
+                if let Some(id_attr) = item.get("jobId") {
+                    // Changed "job_id" to "jobId"
                     if let Some(id_str) = &id_attr.n {
                         if let Ok(id) = id_str.parse::<i64>() {
                             existing_ids.push(id);

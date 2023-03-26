@@ -27,7 +27,6 @@ async fn function_handler(_event: LambdaEvent<IgnoreEvent>) -> Result<String, Er
                 return Err(format!("Error getting jobs previews {}", e).into());
             }
         };
-        tracing::info!("Job previews: {:?}", jobs_previews);
         //? We did a request above, so decrease the number of requests left
         requests_left -= 1;
         //? For the next iteration we will skip the jobs we got in this iteration
@@ -57,7 +56,7 @@ async fn function_handler(_event: LambdaEvent<IgnoreEvent>) -> Result<String, Er
             break;
         }
     }
-    tracing::info!("New jobs: {:?}", all_new_jobs);
+    tracing::info!("Got {} new job ids", all_new_jobs.len());
 
     let tasks = all_new_jobs.iter().map(|job_id| get_job_details(*job_id));
     let detailed_jobs: Vec<JobDetails> = join_all(tasks)
@@ -71,7 +70,7 @@ async fn function_handler(_event: LambdaEvent<IgnoreEvent>) -> Result<String, Er
             }
         })
         .collect();
-    tracing::info!("Got {} jobs", detailed_jobs.len());
+    tracing::info!("Got {} detailed jobs", detailed_jobs.len());
 
     match put_many_job_posts(detailed_jobs.clone()).await {
         Ok(_) => tracing::info!("Successfully put jobs in DynamoDB"),

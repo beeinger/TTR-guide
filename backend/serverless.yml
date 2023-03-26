@@ -65,7 +65,7 @@ functions:
   data_collector:
     handler: api.data-collector
     events:
-      - schedule: rate(12 hours)
+      - schedule: rate(2 hours)
     timeout: 600
   process_job_post:
     handler: api.process-job-post

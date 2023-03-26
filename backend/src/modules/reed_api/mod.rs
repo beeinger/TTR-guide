@@ -39,6 +39,5 @@ pub async fn get_jobs_previews(
     }
 
     let search_result: JobSearchResult = response.json().await?;
-    tracing::info!("Search result: {:?}", search_result);
     Ok(search_result)
 }
