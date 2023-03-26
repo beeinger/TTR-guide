@@ -1,14 +1,56 @@
-use api::modules::statistics::types::PositionStatistics;
+use api::modules::{db::query_data_for_position, statistics::calculate_position_statistics};
 use lambda_http::{run, service_fn, Body, Error, Request, Response};
 use serde_json::json;
+use url::form_urlencoded;
 
 async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
-    let position_statistics: PositionStatistics = PositionStatistics {
-        position: "".to_string(),
-        start_date: "".to_string(),
-        end_date: "".to_string(),
-        tech_statistics: Vec::new(),
+    let query = form_urlencoded::parse(event.uri().query().unwrap_or("").as_bytes());
+    let mut positions: Vec<String> = query
+        .clone()
+        .filter(|(key, _)| key == "positions")
+        .flat_map(|(_, value)| value.split(',').map(|s| s.to_string()).collect::<Vec<_>>())
+        .collect();
+    if positions.is_empty() {
+        positions = vec!["".to_string()];
+    }
+    let count_threshold: Option<u32> = query
+        .clone()
+        .filter(|(key, _)| key == "count_threshold")
+        .flat_map(|(_, value)| value.parse::<u32>().ok())
+        .collect::<Vec<_>>()
+        .first()
+        .cloned();
+    let start_date: Option<String> = query
+        .clone()
+        .filter(|(key, _)| key == "start_date")
+        .flat_map(|(_, value)| value.parse::<String>().ok())
+        .collect::<Vec<_>>()
+        .first()
+        .cloned();
+    let end_date: Option<String> = query
+        .clone()
+        .filter(|(key, _)| key == "end_date")
+        .flat_map(|(_, value)| value.parse::<String>().ok())
+        .collect::<Vec<_>>()
+        .first()
+        .cloned();
+
+    let all_jobs = match query_data_for_position(
+        positions.clone(),
+        start_date.clone(),
+        end_date.clone(),
+    )
+    .await
+    {
+        Ok(all_jobs) => all_jobs,
+        Err(e) => {
+            tracing::error!("Error finding all jobs: {:?}", e);
+            return Err(format!("{:?}", e).into());
+        }
     };
+
+    let position_statistics =
+        calculate_position_statistics(positions, start_date, end_date, all_jobs, count_threshold);
 
     let resp = Response::builder()
         .status(200)

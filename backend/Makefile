@@ -18,6 +18,9 @@ d-invoke-process-all:
 d-invoke-migrate: 
 	@sls invoke -f migrate_db -d "{}" --stage dev
 
+d-logs-statistics:
+	@sls logs -f statistics --stage dev
+
 #? Running tests
 test:
 	@cargo test
