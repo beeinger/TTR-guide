@@ -13,7 +13,7 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
             let sqs_message = serde_json::from_str::<ProcessJobMessage>(&body)?;
 
             match process_job(sqs_message.job.clone()).await {
-                Ok(_) => tracing::info!("Processed job: {:?}", sqs_message.job),
+                Ok(_) => tracing::info!("Processed jobId: {}", sqs_message.job.job_id),
                 Err(e) => tracing::error!("Error processing job: {:?}", e),
             }
 
