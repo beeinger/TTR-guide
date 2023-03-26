@@ -23,6 +23,7 @@ pub fn calculate_position_statistics(
     };
 
     let mut tech_to_statistics = HashMap::new();
+    let mut total_count = 0;
     for job in all_jobs {
         let location_statistics = {
             let mut location_statistics = LocationStatistics {
@@ -118,7 +119,7 @@ pub fn calculate_position_statistics(
                     .entry(tech.clone())
                     .or_insert(TechStatistics {
                         tech: tech,
-                        popularity: 0,
+                        popularity: 0.0,
                         count: 0,
                         location_statistics: LocationStatistics {
                             remote: 0,
@@ -142,6 +143,7 @@ pub fn calculate_position_statistics(
                     });
             //? popularity
             tech_statistics.count += 1;
+            total_count += 1;
             //? location_statistics
             tech_statistics.location_statistics.remote += location_statistics.remote;
             tech_statistics.location_statistics.office += location_statistics.office;
@@ -158,16 +160,11 @@ pub fn calculate_position_statistics(
         }
     }
 
-    let total_count = tech_to_statistics
-        .clone()
-        .into_iter()
-        .fold(0, |acc, (_, tech)| acc + tech.count);
-
     position_statistics.tech_statistics = tech_to_statistics
         .into_iter()
         .map(|(_, mut tech)| {
             //? popularity
-            tech.popularity = tech.count / total_count;
+            tech.popularity = tech.count as f32 / total_count as f32;
 
             //? salary_statistics
             let mut salary_stats = &mut tech.salary_statistics;
