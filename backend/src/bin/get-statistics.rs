@@ -15,21 +15,21 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
     }
     let count_threshold: Option<u32> = query
         .clone()
-        .filter(|(key, _)| key == "count_threshold")
+        .filter(|(key, value)| key == "count_threshold" && value != "")
         .flat_map(|(_, value)| value.parse::<u32>().ok())
         .collect::<Vec<_>>()
         .first()
         .cloned();
     let start_date: Option<String> = query
         .clone()
-        .filter(|(key, _)| key == "start_date")
+        .filter(|(key, value)| key == "start_date" && value != "")
         .flat_map(|(_, value)| value.parse::<String>().ok())
         .collect::<Vec<_>>()
         .first()
         .cloned();
     let end_date: Option<String> = query
         .clone()
-        .filter(|(key, _)| key == "end_date")
+        .filter(|(key, value)| key == "end_date" && value != "")
         .flat_map(|(_, value)| value.parse::<String>().ok())
         .collect::<Vec<_>>()
         .first()
