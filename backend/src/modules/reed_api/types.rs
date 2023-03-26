@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct JobDetails {
     pub employer_id: u32,
@@ -24,6 +24,11 @@ pub struct JobDetails {
     pub contract_type: Option<String>,
     pub job_description: Option<String>,
     pub application_count: Option<u32>,
+    //? From gpt processing
+    pub position: Option<String>,
+    pub technologies: Option<Vec<Option<String>>>,
+    pub work_flexibility: Option<String>,
+    pub processed: Option<bool>,
 }
 
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
