@@ -19,26 +19,9 @@ pub async fn process_job(job: JobDetails) -> Result<(), Box<dyn std::error::Erro
         }
     };
     let job_update = JobDetails {
-        position: match processed_job.position {
-            Some(position) => Some(position.to_lowercase()),
-            None => None,
-        },
-        technologies: match processed_job.technologies {
-            Some(technologies) => Some(
-                technologies
-                    .iter()
-                    .map(|technology| match technology {
-                        Some(technology) => Some(technology.to_lowercase()),
-                        None => None,
-                    })
-                    .collect(),
-            ),
-            None => None,
-        },
-        work_flexibility: match processed_job.work_flexibility {
-            Some(work_flexibility) => Some(work_flexibility.to_lowercase()),
-            None => None,
-        },
+        position: processed_job.position,
+        technologies: processed_job.technologies,
+        work_flexibility: processed_job.work_flexibility,
         processed: Some(true),
         ..job
     };

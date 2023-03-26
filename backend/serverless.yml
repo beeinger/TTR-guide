@@ -104,8 +104,9 @@ resources:
     JobPostsQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: "${opt:stage}-job-posts-queue"
+        QueueName: "${opt:stage}-job-posts-queue.fifo"
         VisibilityTimeout: 120
+        FifoQueue: true
 
 custom:
   rust:

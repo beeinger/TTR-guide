@@ -3,7 +3,6 @@ use api::modules::{
     process_job::sqs::add_jobs_to_sqs,
     reed_api::{get_job_details, get_jobs_previews, types::JobDetails},
 };
-use futures::future::join_all;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::Deserialize;
 
@@ -58,18 +57,17 @@ async fn function_handler(_event: LambdaEvent<IgnoreEvent>) -> Result<String, Er
     }
     tracing::info!("Got {} new job ids", all_new_jobs.len());
 
-    let tasks = all_new_jobs.iter().map(|job_id| get_job_details(*job_id));
-    let detailed_jobs: Vec<JobDetails> = join_all(tasks)
-        .await
-        .into_iter()
-        .filter_map(|result| match result {
-            Ok(job_details) => Some(job_details),
+    let mut detailed_jobs: Vec<JobDetails> = Vec::new();
+
+    for job_id in all_new_jobs {
+        match get_job_details(job_id).await {
+            Ok(job_details) => detailed_jobs.push(job_details),
             Err(e) => {
                 tracing::error!("Error getting job details: {}", e);
-                None
             }
-        })
-        .collect();
+        }
+    }
+
     tracing::info!("Got {} detailed jobs", detailed_jobs.len());
 
     match put_many_job_posts(detailed_jobs.clone()).await {

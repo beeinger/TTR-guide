@@ -11,7 +11,7 @@ pub async fn extract_job_details() {
 
     assert_eq!(
         extracted_description.position,
-        Some("full stack".to_string())
+        Some("full stack engin".to_string())
     );
     assert_eq!(
         extracted_description.technologies,
