@@ -1,11 +1,11 @@
 use super::{config, reed_api::types::JobDetails};
 use futures::future::join_all;
-use rusoto_core::{Region, RusotoError};
+use rusoto_core::Region;
 use rusoto_dynamodb::{
-    AttributeValue, BatchGetItemInput, BatchWriteItemInput, DynamoDb, DynamoDbClient, GetItemError,
-    GetItemInput, KeysAndAttributes, PutRequest, WriteRequest,
+    AttributeValue, BatchGetItemInput, BatchWriteItemInput, DynamoDb, DynamoDbClient, GetItemInput,
+    KeysAndAttributes, PutRequest, ScanInput, WriteRequest,
 };
-use std::collections::HashMap;
+use std::{collections::HashMap, error::Error};
 
 pub async fn put_many_job_posts(
     job_posts: Vec<JobDetails>,
@@ -58,7 +58,7 @@ pub async fn put_many_job_posts(
     Ok(())
 }
 
-pub async fn item_exists(job_id: i64) -> Result<bool, RusotoError<GetItemError>> {
+pub async fn get_item(job_id: i64) -> Result<JobDetails, Box<dyn Error>> {
     let client = DynamoDbClient::new(Region::EuWest2);
     let mut key = HashMap::new();
     key.insert(
@@ -74,8 +74,8 @@ pub async fn item_exists(job_id: i64) -> Result<bool, RusotoError<GetItemError>>
         ..Default::default()
     };
     match client.get_item(input).await {
-        Ok(output) => Ok(output.item.is_some()),
-        Err(err) => Err(err),
+        Ok(output) => Ok(serde_dynamodb::from_hashmap(output.item.unwrap()).unwrap()),
+        Err(err) => Err(Box::new(err)),
     }
 }
 
@@ -139,4 +139,61 @@ pub async fn filter_existing_items(
         .filter(|id| !existing_ids.contains(id))
         .collect();
     Ok(non_existing_ids)
+}
+
+pub async fn find_not_processed() -> Result<Vec<JobDetails>, Box<dyn Error>> {
+    let client = DynamoDbClient::new(Region::EuWest2);
+
+    let expression_attribute_names = {
+        let mut expression_attribute_names = std::collections::HashMap::new();
+        expression_attribute_names.insert("#processed".to_string(), "processed".to_string());
+        Some(expression_attribute_names)
+    };
+
+    let expression_attribute_values = Some(
+        serde_dynamodb::to_hashmap(&serde_json::json!({":processed": true}))
+            .unwrap()
+            .into_iter()
+            .map(|(k, v)| (k, v.into()))
+            .collect(),
+    );
+
+    let filter_expression =
+        Some("attribute_not_exists(#processed) OR #processed <> :processed".to_owned());
+
+    let input = ScanInput {
+        table_name: config::get_table_name(),
+        filter_expression,
+        expression_attribute_values,
+        expression_attribute_names,
+        ..Default::default()
+    };
+
+    let mut items = Vec::new();
+
+    let mut last_evaluated_key = None;
+    loop {
+        let mut input = input.clone();
+        input.exclusive_start_key = last_evaluated_key;
+
+        let output = client.scan(input).await?;
+        if let Some(ref keys) = output.last_evaluated_key {
+            last_evaluated_key = Some(keys.clone());
+        } else {
+            last_evaluated_key = None;
+        }
+
+        if let Some(ref items_raw) = output.items {
+            for item in items_raw {
+                let item = serde_dynamodb::from_hashmap(item.clone())?;
+                items.push(item);
+            }
+        }
+
+        if last_evaluated_key.is_none() {
+            break;
+        }
+    }
+
+    Ok(items)
 }
