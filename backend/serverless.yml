@@ -10,6 +10,8 @@ provider:
   environment:
     TABLE_NAME:
       Ref: JobPostsTable
+    JOB_POSTS_QUEUE_URL:
+      Ref: JobPostsQueue
   iam:
     role:
       statements:
@@ -26,6 +28,14 @@ provider:
             - dynamodb:BatchGetItem
           Resource:
             - "Fn::GetAtt": [JobPostsTable, Arn]
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+            - sqs:SendMessageBatch
+            - sqs:DeleteMessage
+            - sqs:DeleteMessageBatch
+          Resource:
+            - "Fn::GetAtt": [JobPostsQueue, Arn]
 
 package:
   individually: true
@@ -57,6 +67,17 @@ functions:
     events:
       - schedule: rate(12 hours)
     timeout: 600
+  process_job_post:
+    handler: api.process-job-post
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - JobPostsQueue
+              - Arn
+    timeout: 60
+  process_all_job_posts:
+    handler: api.process-all-job-posts
 
 resources:
   Resources:
@@ -70,9 +91,12 @@ resources:
         KeySchema:
           - AttributeName: jobId
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
+    JobPostsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: "${opt:stage}-job-posts-queue"
+        VisibilityTimeout: 120
 
 custom:
   rust:

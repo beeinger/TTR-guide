@@ -1,5 +1,6 @@
 use api::modules::{
     db::{filter_existing_items, put_many_job_posts},
+    process_job::sqs::add_jobs_to_sqs,
     reed_api::{get_job_details, get_jobs_previews, types::JobDetails},
 };
 use futures::future::join_all;
@@ -72,13 +73,22 @@ async fn function_handler(_event: LambdaEvent<IgnoreEvent>) -> Result<String, Er
         .collect();
     tracing::info!("Got {} jobs", detailed_jobs.len());
 
-    match put_many_job_posts(detailed_jobs).await {
+    match put_many_job_posts(detailed_jobs.clone()).await {
         Ok(_) => tracing::info!("Successfully put jobs in DynamoDB"),
         Err(e) => {
             tracing::error!("Error putting jobs in DynamoDB: {}", e);
             return Err(format!("Error putting jobs in DynamoDB: {}", e).into());
         }
     }
+
+    match add_jobs_to_sqs(detailed_jobs).await {
+        Ok(_) => tracing::info!("Successfully added jobs to SQS"),
+        Err(e) => {
+            tracing::error!("Error adding jobs to SQS: {}", e);
+            return Err(format!("Error adding jobs to SQS: {}", e).into());
+        }
+    }
+
     Ok("Success".to_string())
 }
 
