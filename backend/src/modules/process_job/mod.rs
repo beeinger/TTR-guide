@@ -11,7 +11,7 @@ pub async fn process_job(job: JobDetails) -> Result<(), Box<dyn std::error::Erro
             return Ok(());
         }
     };
-    let processed_job = match super::gpt::extract_job_details(&job_description.as_str()).await {
+    let processed_job = match super::gpt::extract_job_details(job_description.as_str()).await {
         Ok(job) => job,
         Err(e) => {
             tracing::error!("Error processing job: {:?}", e);

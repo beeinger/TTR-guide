@@ -44,11 +44,11 @@ pub async fn extract_job_details(
     let content = response_json["choices"][0]["message"]["content"].as_str();
 
     if let Some(valid_content) = content {
-        let result = valid_content.trim().replace("'", "\"");
+        let result = valid_content.trim().replace('\'', "\"");
         let parsed_result: self::types::ExtractedDescription =
             serde_json::from_str(result.as_str())?;
-        return Ok(parsed_result);
+        Ok(parsed_result)
     } else {
-        return Err(format!("Unable to extract content from response {:?}", content).into());
+        Err(format!("Unable to extract content from response {:?}", content).into())
     }
 }
