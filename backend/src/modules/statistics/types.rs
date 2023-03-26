@@ -11,7 +11,7 @@ pub struct PositionStatistics {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TechStatistics {
     pub tech: String,
-    pub popularity: u32,
+    pub popularity: f32,
     pub count: u32,
     pub location_statistics: LocationStatistics,
     pub type_statistics: TypeStatistics,
