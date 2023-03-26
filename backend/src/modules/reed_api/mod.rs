@@ -16,7 +16,18 @@ pub async fn get_job_details(job_id: i64) -> Result<JobDetails, Box<dyn std::err
         return Err(format!("Error: {}", response.status()).into());
     }
 
-    Ok(response.json().await?)
+    let mut job_details: JobDetails = response.json().await?;
+    //? Lowercase the job title and description
+    job_details.job_description = match job_details.job_description {
+        Some(job_description) => Some(job_description.to_lowercase()),
+        None => None,
+    };
+    job_details.job_title = match job_details.job_title {
+        Some(job_title) => Some(job_title.to_lowercase()),
+        None => None,
+    };
+
+    Ok(job_details)
 }
 
 pub async fn get_jobs_previews(
