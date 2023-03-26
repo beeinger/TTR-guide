@@ -1,9 +1,10 @@
 use super::{config, reed_api::types::JobDetails};
+use chrono::NaiveDate;
 use futures::future::join_all;
 use rusoto_core::Region;
 use rusoto_dynamodb::{
     AttributeValue, BatchGetItemInput, BatchWriteItemInput, DynamoDb, DynamoDbClient, GetItemInput,
-    KeysAndAttributes, PutRequest, QueryInput, ScanInput, WriteRequest,
+    KeysAndAttributes, PutRequest, ScanInput, WriteRequest,
 };
 use std::{collections::HashMap, error::Error};
 
@@ -194,53 +195,6 @@ pub async fn find_not_processed() -> Result<Vec<JobDetails>, Box<dyn Error>> {
     Ok(items)
 }
 
-pub async fn query_data_for_position(
-    position: &str,
-) -> Result<Vec<JobDetails>, Box<dyn std::error::Error>> {
-    let client = DynamoDbClient::new(Region::EuWest2);
-    let table_name = config::get_table_name();
-
-    let mut expression_attribute_values = HashMap::new();
-    expression_attribute_values.insert(
-        ":position_val".to_string(),
-        AttributeValue {
-            s: Some(position.to_string()),
-            ..Default::default()
-        },
-    );
-
-    let query_input = QueryInput {
-        table_name,
-        filter_expression: Some("contains(position, :position_val) OR contains(job_title, :position_val) OR contains(job_description, :position_val)".to_string()),
-        expression_attribute_values: Some(expression_attribute_values),
-        ..Default::default()
-    };
-
-    let mut job_details: Vec<JobDetails> = Vec::new();
-    let mut last_evaluated_key: Option<HashMap<String, AttributeValue>> = None;
-
-    loop {
-        let mut query_input = query_input.clone();
-        query_input.exclusive_start_key = last_evaluated_key.clone();
-
-        let result = client.query(query_input.clone()).await?;
-        let items = result.items.unwrap_or_default();
-
-        for item in items {
-            if let Ok(job) = serde_dynamodb::from_hashmap(item) {
-                job_details.push(job);
-            }
-        }
-
-        last_evaluated_key = result.last_evaluated_key;
-        if last_evaluated_key.is_none() {
-            break;
-        }
-    }
-
-    Ok(job_details)
-}
-
 pub async fn get_all_items() -> Result<Vec<JobDetails>, Box<dyn std::error::Error>> {
     let client = DynamoDbClient::new(Region::EuWest2);
     let table_name = config::get_table_name();
@@ -261,6 +215,120 @@ pub async fn get_all_items() -> Result<Vec<JobDetails>, Box<dyn std::error::Erro
         for item in items {
             if let Ok(job) = serde_dynamodb::from_hashmap(item) {
                 job_details.push(job);
+            }
+        }
+
+        last_evaluated_key = result.last_evaluated_key;
+        if last_evaluated_key.is_none() {
+            break;
+        }
+    }
+
+    Ok(job_details)
+}
+
+pub async fn query_data_for_position(
+    positions: Vec<String>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+) -> Result<Vec<JobDetails>, Box<dyn std::error::Error>> {
+    //? 100 is the max number of constrains in a query, 3 is the number of constrains we do per position
+    let chunk_size = 100 / 3;
+    let mut all_job_details: Vec<JobDetails> = Vec::new();
+
+    for position_chunk in positions.chunks(chunk_size) {
+        let mut job_details = query_data_for_position_chunk(
+            position_chunk.to_vec(),
+            start_date.clone(),
+            end_date.clone(),
+        )
+        .await?;
+        all_job_details.append(&mut job_details);
+    }
+
+    Ok(all_job_details)
+}
+
+async fn query_data_for_position_chunk(
+    positions: Vec<String>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+) -> Result<Vec<JobDetails>, Box<dyn std::error::Error>> {
+    let client = DynamoDbClient::new(Region::EuWest2);
+    let table_name = config::get_table_name();
+
+    let start_date = start_date
+        .map(|date| NaiveDate::parse_from_str(&date, "%d/%m/%Y"))
+        .transpose()?;
+    let end_date = end_date
+        .map(|date| NaiveDate::parse_from_str(&date, "%d/%m/%Y"))
+        .transpose()?;
+
+    let mut expression_attribute_values = HashMap::new();
+    let mut expression_attribute_names = HashMap::new();
+    let mut filter_expression_parts = Vec::new();
+    for (i, position) in positions.iter().enumerate() {
+        let position_key = format!(":position_val{}", i);
+        let position_name_key = format!("#position_name{}", i);
+
+        expression_attribute_values.insert(
+            position_key.clone(),
+            AttributeValue {
+                s: Some(position.to_string()),
+                ..Default::default()
+            },
+        );
+
+        expression_attribute_names.insert(position_name_key.clone(), "position".to_string());
+
+        filter_expression_parts.push(format!(
+            "contains({}, {}) OR contains(job_title, {}) OR contains(job_description, {})",
+            position_name_key, position_key, position_key, position_key
+        ));
+    }
+
+    let filter_expression = filter_expression_parts.join(" OR ");
+
+    let scan_input = ScanInput {
+        table_name,
+        filter_expression: Some(filter_expression),
+        expression_attribute_values: Some(expression_attribute_values),
+        expression_attribute_names: Some(expression_attribute_names),
+        ..Default::default()
+    };
+
+    let mut job_details: Vec<JobDetails> = Vec::new();
+    let mut last_evaluated_key: Option<HashMap<String, AttributeValue>> = None;
+
+    loop {
+        let mut scan_input = scan_input.clone();
+        scan_input.exclusive_start_key = last_evaluated_key.clone();
+
+        let result = client.scan(scan_input.clone()).await?;
+        let items = result.items.unwrap_or_default();
+
+        for item in items {
+            if let Ok(job) = serde_dynamodb::from_hashmap::<JobDetails, _>(item) {
+                // Parse the date_posted as a NaiveDate object
+                let job_date_posted = match job.date_posted.clone() {
+                    Some(date) => NaiveDate::parse_from_str(&date, "%d/%m/%Y")?,
+                    None => continue,
+                };
+
+                // Check if the date_posted falls within the specified range
+                let is_within_range = match (&start_date, &end_date) {
+                    (Some(start), Some(end)) => {
+                        job_date_posted >= *start && job_date_posted <= *end
+                    }
+                    (Some(start), None) => job_date_posted >= *start,
+                    (None, Some(end)) => job_date_posted <= *end,
+                    (None, None) => true,
+                };
+
+                // Only include the job if it falls within the specified range
+                if is_within_range {
+                    job_details.push(job);
+                }
             }
         }
 

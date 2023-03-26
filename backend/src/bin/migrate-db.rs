@@ -27,6 +27,26 @@ async fn function_handler(_event: LambdaEvent<IgnoreEvent>) -> Result<(), Error>
                 Some(job_title) => Some(job_title.to_lowercase()),
                 None => None,
             };
+            job_details.position = match job_details.position {
+                Some(position) => Some(position.to_lowercase()),
+                None => None,
+            };
+            job_details.work_flexibility = match job_details.work_flexibility {
+                Some(work_flexibility) => Some(work_flexibility.to_lowercase()),
+                None => None,
+            };
+            job_details.technologies = match job_details.technologies {
+                Some(technologies) => Some(
+                    technologies
+                        .iter()
+                        .map(|technology| match technology {
+                            Some(technology) => Some(technology.to_lowercase()),
+                            None => None,
+                        })
+                        .collect(),
+                ),
+                None => None,
+            };
             job_details
         })
         .collect();
