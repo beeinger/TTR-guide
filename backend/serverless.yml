@@ -78,6 +78,15 @@ functions:
     timeout: 60
   process_all_job_posts:
     handler: api.process-all-job-posts
+  migrate_db:
+    handler: api.migrate-db
+  statistics:
+    handler: api.get-statistics
+    events:
+      - http:
+          path: statistics
+          method: get
+          cors: true
 
 resources:
   Resources:

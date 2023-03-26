@@ -15,6 +15,9 @@ d-logs-data-collector:
 d-invoke-process-all: 
 	@sls invoke -f process_all_job_posts -d "{}" --stage dev
 
+d-invoke-migrate: 
+	@sls invoke -f migrate_db -d "{}" --stage dev
+
 #? Running tests
 test:
 	@cargo test

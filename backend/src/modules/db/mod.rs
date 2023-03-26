@@ -3,7 +3,7 @@ use futures::future::join_all;
 use rusoto_core::Region;
 use rusoto_dynamodb::{
     AttributeValue, BatchGetItemInput, BatchWriteItemInput, DynamoDb, DynamoDbClient, GetItemInput,
-    KeysAndAttributes, PutRequest, ScanInput, WriteRequest,
+    KeysAndAttributes, PutRequest, QueryInput, ScanInput, WriteRequest,
 };
 use std::{collections::HashMap, error::Error};
 
@@ -192,4 +192,83 @@ pub async fn find_not_processed() -> Result<Vec<JobDetails>, Box<dyn Error>> {
     }
 
     Ok(items)
+}
+
+pub async fn query_data_for_position(
+    position: &str,
+) -> Result<Vec<JobDetails>, Box<dyn std::error::Error>> {
+    let client = DynamoDbClient::new(Region::EuWest2);
+    let table_name = config::get_table_name();
+
+    let mut expression_attribute_values = HashMap::new();
+    expression_attribute_values.insert(
+        ":position_val".to_string(),
+        AttributeValue {
+            s: Some(position.to_string()),
+            ..Default::default()
+        },
+    );
+
+    let query_input = QueryInput {
+        table_name,
+        filter_expression: Some("contains(position, :position_val) OR contains(job_title, :position_val) OR contains(job_description, :position_val)".to_string()),
+        expression_attribute_values: Some(expression_attribute_values),
+        ..Default::default()
+    };
+
+    let mut job_details: Vec<JobDetails> = Vec::new();
+    let mut last_evaluated_key: Option<HashMap<String, AttributeValue>> = None;
+
+    loop {
+        let mut query_input = query_input.clone();
+        query_input.exclusive_start_key = last_evaluated_key.clone();
+
+        let result = client.query(query_input.clone()).await?;
+        let items = result.items.unwrap_or_default();
+
+        for item in items {
+            if let Ok(job) = serde_dynamodb::from_hashmap(item) {
+                job_details.push(job);
+            }
+        }
+
+        last_evaluated_key = result.last_evaluated_key;
+        if last_evaluated_key.is_none() {
+            break;
+        }
+    }
+
+    Ok(job_details)
+}
+
+pub async fn get_all_items() -> Result<Vec<JobDetails>, Box<dyn std::error::Error>> {
+    let client = DynamoDbClient::new(Region::EuWest2);
+    let table_name = config::get_table_name();
+
+    let mut job_details: Vec<JobDetails> = Vec::new();
+    let mut last_evaluated_key: Option<HashMap<String, AttributeValue>> = None;
+
+    loop {
+        let scan_input = ScanInput {
+            table_name: table_name.clone(),
+            exclusive_start_key: last_evaluated_key.clone(),
+            ..Default::default()
+        };
+
+        let result = client.scan(scan_input).await?;
+        let items = result.items.unwrap_or_default();
+
+        for item in items {
+            if let Ok(job) = serde_dynamodb::from_hashmap(item) {
+                job_details.push(job);
+            }
+        }
+
+        last_evaluated_key = result.last_evaluated_key;
+        if last_evaluated_key.is_none() {
+            break;
+        }
+    }
+
+    Ok(job_details)
 }
