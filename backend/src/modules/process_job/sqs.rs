@@ -29,7 +29,6 @@ pub async fn add_jobs_to_sqs(jobs: Vec<JobDetails>) -> Result<(), Box<dyn std::e
         let request = SendMessageBatchRequest {
             entries,
             queue_url: queue_url.clone(),
-            ..Default::default()
         };
 
         sqs_client.send_message_batch(request).await?;

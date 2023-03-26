@@ -151,13 +151,8 @@ pub async fn find_not_processed() -> Result<Vec<JobDetails>, Box<dyn Error>> {
         Some(expression_attribute_names)
     };
 
-    let expression_attribute_values = Some(
-        serde_dynamodb::to_hashmap(&serde_json::json!({":processed": true}))
-            .unwrap()
-            .into_iter()
-            .map(|(k, v)| (k, v.into()))
-            .collect(),
-    );
+    let expression_attribute_values =
+        Some(serde_dynamodb::to_hashmap(&serde_json::json!({":processed": true})).unwrap());
 
     let filter_expression =
         Some("attribute_not_exists(#processed) OR #processed <> :processed".to_owned());

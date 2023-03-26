@@ -18,3 +18,6 @@ d-invoke-process-all:
 #? Running tests
 test:
 	@cargo test
+
+lint:
+	@cargo clippy --all-targets -- -D clippy::all
