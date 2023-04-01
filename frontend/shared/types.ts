@@ -1,8 +1,13 @@
+export interface StatisticsResponse {
+  generation_queued: boolean;
+  statistics: PositionStatistics;
+}
+
 export interface PositionStatistics {
   positions: string[];
-  start_date: string | null;
-  end_date: string | null;
-  tech_statistics: TechStatistics[];
+  startDate: string | null;
+  endDate: string | null;
+  techStatistics: TechStatistics[];
 }
 
 export interface TechStatistics {
