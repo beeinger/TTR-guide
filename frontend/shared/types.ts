@@ -18,6 +18,7 @@ export interface TechStatistics {
   type_statistics: TypeStatistics;
   salary_statistics: SalaryStatistics;
   popularity_statistics: PopularityStatistics[];
+  total_jobs_count: number;
 }
 
 export interface LocationStatistics {
