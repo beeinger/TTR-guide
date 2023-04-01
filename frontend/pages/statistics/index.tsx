@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { StatisticsResponse } from "shared/types";
 import { InferGetServerSidePropsType } from "next";
 import TechStatistic from "components/TechStatistics";
@@ -9,8 +9,6 @@ import DateRange from "components/DateRange";
 import Sorting from "components/Sorting";
 import { useRouter } from "next/router";
 
-const fetcher = (url) => axios.get(url).then((res) => res.data);
-
 export default function index({
   error,
   position,
@@ -18,8 +16,6 @@ export default function index({
   statistics,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-
-  console.log(statistics);
 
   useEffect(() => {
     const refreshData = () => router.replace(router.asPath);
@@ -53,21 +49,124 @@ export default function index({
       <Header>
         <DateRange />
         <Position>
-          {position}
+          {position.split(",").join(", ")}
           <span>
-            Data based on <b>{statistics?.totalJobsCount}</b> job posts
+            based on <b>{statistics?.totalJobsCount ?? "-"}</b> job posts
           </span>
         </Position>
         <Sorting />
       </Header>
       <Statistics>
-        {techStatistics.map((tech) => (
-          <TechStatistic key={tech.tech} tech={tech} maxValues={maxValues} />
-        ))}
+        {techStatistics.length ? (
+          techStatistics.map((tech) => (
+            <TechStatistic key={tech.tech} tech={tech} maxValues={maxValues} />
+          ))
+        ) : (
+          <NoData>
+            {generation_queued ? (
+              <>
+                <Info>
+                  It seems you are <i>the first</i> to request this data!
+                </Info>
+                <span>
+                  Hang tight, we are generating it <i>just for you</i>! 🫡
+                </span>
+                <Spinner>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                </Spinner>
+              </>
+            ) : (
+              "Sorry, we have no data on this yet."
+            )}
+          </NoData>
+        )}
       </Statistics>
     </Layout>
   );
 }
+
+const Info = styled.span`
+  font-size: 1.5rem;
+  display: block;
+  margin-bottom: 8px;
+  font-family: "TrapSemBd";
+`;
+
+const Spinner = styled.div`
+  opacity: 0.5;
+
+  & {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 80px;
+  }
+  & div {
+    position: absolute;
+    top: 33px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #fff;
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+  }
+  & div:nth-child(1) {
+    left: 8px;
+    animation: lds-ellipsis1 0.6s infinite;
+  }
+  & div:nth-child(2) {
+    left: 8px;
+    animation: lds-ellipsis2 0.6s infinite;
+  }
+  & div:nth-child(3) {
+    left: 32px;
+    animation: lds-ellipsis2 0.6s infinite;
+  }
+  & div:nth-child(4) {
+    left: 56px;
+    animation: lds-ellipsis3 0.6s infinite;
+  }
+  @keyframes lds-ellipsis1 {
+    0% {
+      transform: scale(0);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes lds-ellipsis3 {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(0);
+    }
+  }
+  @keyframes lds-ellipsis2 {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(24px, 0);
+    }
+  }
+`;
+
+const NoData = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100vw;
+  min-height: 30vh;
+
+  i {
+    font-style: italic;
+    font-weight: 600;
+  }
+`;
 
 const Header = styled.div`
   display: flex;
