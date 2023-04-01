@@ -35,7 +35,7 @@ pub async fn get_jobs_previews(
 ) -> Result<JobSearchResult, Box<dyn std::error::Error>> {
     let url = format!(
         "https://www.reed.co.uk/api/1.0/search?keywords={}&resultsToSkip={}",
-        "frontend,backend,fullstack,full stack",
+        "engineer,developer,frontend,backend,full stack,blockchain,web,smart contract,software,js,javascript,ts,typescript,ethereum,web3,python,rust,java,android,ios,coding,programming,flutter,vue,angular,php,scala,go,elixir,dart,swift,fullstack,back end,front end",
         skip_first.unwrap_or(0)
     );
     let client = reqwest::Client::new();
