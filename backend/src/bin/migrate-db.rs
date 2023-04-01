@@ -1,12 +1,12 @@
 use api::modules::{
-    db::{get_all_items, put_many_job_posts},
+    db::job_posts::{get_all, put_many},
     reed_api::types::JobDetails,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::Deserialize;
 
 async fn function_handler(_event: LambdaEvent<IgnoreEvent>) -> Result<(), Error> {
-    let all_items = match get_all_items().await {
+    let all_items = match get_all().await {
         Ok(all_items) => all_items,
         Err(e) => {
             tracing::error!("Error finding all items: {:?}", e);
@@ -51,7 +51,7 @@ async fn function_handler(_event: LambdaEvent<IgnoreEvent>) -> Result<(), Error>
         })
         .collect();
 
-    match put_many_job_posts(updates).await {
+    match put_many(updates).await {
         Ok(_) => tracing::info!("Successfully updated all items"),
         Err(e) => {
             tracing::error!("Error updating all items: {:?}", e);

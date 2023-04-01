@@ -1,5 +1,5 @@
 use super::{
-    db::{filter_existing_items, put_many_job_posts},
+    db::job_posts::{filter_existing, put_many},
     process_job::sqs::add_jobs_to_sqs,
     reed_api::{get_job_details, get_jobs_previews, types::JobDetails},
 };
@@ -31,7 +31,7 @@ pub async fn data_collector_handler(_event: LambdaEvent<IgnoreEvent>) -> Result<
         //? For the next iteration we will skip the jobs we got in this iteration
         skip += jobs_previews.results.len() as u32;
 
-        let new_jobs = match filter_existing_items(
+        let new_jobs = match filter_existing(
             jobs_previews
                 .results
                 .into_iter()
@@ -70,7 +70,7 @@ pub async fn data_collector_handler(_event: LambdaEvent<IgnoreEvent>) -> Result<
 
     tracing::info!("Got {} detailed jobs", detailed_jobs.len());
 
-    match put_many_job_posts(detailed_jobs.clone()).await {
+    match put_many(detailed_jobs.clone()).await {
         Ok(_) => tracing::info!("Successfully put jobs in DynamoDB"),
         Err(e) => {
             tracing::error!("Error putting jobs in DynamoDB: {}", e);

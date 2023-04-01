@@ -1,4 +1,4 @@
-use api::modules::{db::find_not_processed, process_job::sqs::add_jobs_to_sqs};
+use api::modules::{db::job_posts::find_not_processed, process_job::sqs::add_jobs_to_sqs};
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::Deserialize;
 
