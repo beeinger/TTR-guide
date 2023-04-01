@@ -18,13 +18,13 @@ export default function index({
   statistics,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const refreshData = useCallback(() => router.replace(router.asPath), [router]);
 
   useEffect(() => {
-    if (generation_queued) {
-      setTimeout(refreshData, 1000);
-    }
-  }, [generation_queued, refreshData]);
+    const refreshData = () => router.replace(router.asPath);
+    let timeout: NodeJS.Timeout;
+    if (generation_queued) timeout = setTimeout(refreshData, 1000);
+    return () => clearTimeout(timeout);
+  }, [generation_queued, router]);
 
   const maxValues = useMemo(
     () => ({
