@@ -23,6 +23,7 @@ pub async fn add_jobs_to_sqs(jobs: Vec<JobDetails>) -> Result<(), Box<dyn std::e
                 id: job.job_id.to_string(),
                 message_body,
                 message_group_id: Some(SQS_FIFO_GROUP_ID.to_string()),
+                message_deduplication_id: Some(job.job_id.to_string()),
                 ..Default::default()
             };
             entries.push(entry);

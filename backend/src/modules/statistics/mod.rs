@@ -91,6 +91,7 @@ pub fn calculate_position_statistics(
         start_date,
         end_date,
         tech_statistics: Vec::new(),
+        total_jobs_count: all_jobs.len() as u32,
     };
 
     let mut tech_to_statistics = HashMap::new();
