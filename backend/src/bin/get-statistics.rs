@@ -8,7 +8,6 @@ use url::form_urlencoded;
 async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
     let query = form_urlencoded::parse(event.uri().query().unwrap_or("").as_bytes());
     let mut positions: Vec<String> = query
-        .clone()
         .filter(|(key, _)| key == "positions")
         .flat_map(|(_, value)| value.split(',').map(|s| s.to_string()).collect::<Vec<_>>())
         .collect();
@@ -16,21 +15,18 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
         positions = vec!["".to_string()];
     }
     let count_threshold: Option<usize> = query
-        .clone()
         .filter(|(key, value)| key == "count_threshold" && value != "")
         .flat_map(|(_, value)| value.parse::<usize>().ok())
         .collect::<Vec<_>>()
         .first()
         .cloned();
     let start_date: Option<String> = query
-        .clone()
         .filter(|(key, value)| key == "start_date" && value != "")
         .flat_map(|(_, value)| value.parse::<String>().ok())
         .collect::<Vec<_>>()
         .first()
         .cloned();
     let end_date: Option<String> = query
-        .clone()
         .filter(|(key, value)| key == "end_date" && value != "")
         .flat_map(|(_, value)| value.parse::<String>().ok())
         .collect::<Vec<_>>()

@@ -18,14 +18,12 @@ pub async fn get_job_details(job_id: i64) -> Result<JobDetails, Box<dyn std::err
 
     let mut job_details: JobDetails = response.json().await?;
     //? Lowercase the job title and description
-    job_details.job_description = match job_details.job_description {
-        Some(job_description) => Some(job_description.to_lowercase()),
-        None => None,
-    };
-    job_details.job_title = match job_details.job_title {
-        Some(job_title) => Some(job_title.to_lowercase()),
-        None => None,
-    };
+    job_details.job_description = job_details
+        .job_description
+        .map(|job_description| job_description.to_lowercase());
+    job_details.job_title = job_details
+        .job_title
+        .map(|job_title| job_title.to_lowercase());
 
     Ok(job_details)
 }
