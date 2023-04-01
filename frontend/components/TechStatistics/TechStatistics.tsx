@@ -40,7 +40,7 @@ const Container = styled.div<{ popularity: number; maxPopularity: number }>`
   align-items: center;
   min-width: 400px;
   opacity: ${({ popularity, maxPopularity }) =>
-    1 - maxPopularity + popularity - (maxPopularity - popularity) * 6 || 1};
+    1 - maxPopularity + popularity - (maxPopularity - popularity) * 2 || 1};
 `;
 
 const Title = styled.h2`
