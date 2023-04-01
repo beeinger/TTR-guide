@@ -1,4 +1,7 @@
-use api::modules::{db::job_posts::query_for_positions, statistics::calculate_position_statistics};
+use api::modules::{
+    db::{self},
+    statistics::{self, fetch_and_calculate_position_statistics},
+};
 use lambda_http::{run, service_fn, Body, Error, Request, Response};
 use serde_json::json;
 use url::form_urlencoded;
@@ -35,17 +38,32 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
         .first()
         .cloned();
 
-    let all_jobs =
-        match query_for_positions(positions.clone(), start_date.clone(), end_date.clone()).await {
-            Ok(all_jobs) => all_jobs,
-            Err(e) => {
-                tracing::error!("Error finding all jobs: {:?}", e);
-                return Err(format!("{:?}", e).into());
-            }
-        };
+    let stat_id = statistics::get_stat_id(positions.clone(), start_date.clone(), end_date.clone());
+    let cached_statistics_result = db::statistics::get(stat_id).await;
 
-    let position_statistics =
-        calculate_position_statistics(positions, start_date, end_date, all_jobs, count_threshold);
+    let position_statistics = 
+    //? If there is a cached statistics object, use it.
+    if let Ok(cached_statistics) = cached_statistics_result {
+        //? If the cached statistics are less than 24 hours old, return them.
+        if cached_statistics.timestamp + 60 * 60 * 24 > chrono::Utc::now().timestamp() {
+            cached_statistics
+        }
+        //? Otherwise, fetch the latest statistics and update the cache.
+        else {
+            fetch_and_calculate_position_statistics(
+                positions.clone(),
+                start_date.clone(),
+                end_date.clone(),
+                count_threshold,
+            )
+            .await?
+        }
+    }
+    //? If there is no cached statistics object, fetch the latest statistics and update the cache. 
+    else {
+        fetch_and_calculate_position_statistics(positions, start_date, end_date, count_threshold)
+            .await?
+    };
 
     let resp = Response::builder()
         .status(200)

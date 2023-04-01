@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PositionStatistics {
+    pub stat_id: String,
+    pub timestamp: i64,
     pub positions: Vec<String>,
     pub start_date: Option<String>,
     pub end_date: Option<String>,

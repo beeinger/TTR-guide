@@ -10,8 +10,12 @@ provider:
   environment:
     JOB_POSTS_TABLE_NAME:
       Ref: JobPostsTable
+    STATISTICS_TABLE_NAME:
+      Ref: StatisticsTable
     JOB_POSTS_QUEUE_URL:
       Ref: JobPostsQueue
+    GENERATE_STATISTICS_QUEUE_URL:
+      Ref: GenerateStatisticsQueue
   iam:
     role:
       statements:
@@ -28,6 +32,7 @@ provider:
             - dynamodb:BatchGetItem
           Resource:
             - "Fn::GetAtt": [JobPostsTable, Arn]
+            - "Fn::GetAtt": [StatisticsTable, Arn]
         - Effect: Allow
           Action:
             - sqs:SendMessage
@@ -36,6 +41,7 @@ provider:
             - sqs:DeleteMessageBatch
           Resource:
             - "Fn::GetAtt": [JobPostsQueue, Arn]
+            - "Fn::GetAtt": [GenerateStatisticsQueue, Arn]
 
 package:
   individually: true
@@ -45,10 +51,21 @@ plugins:
   - serverless-dotenv-plugin
 
 functions:
+  #? --- CRONs ---
+  data_collector:
+    handler: api.data-collector
+    events:
+      - schedule: rate(70 minutes)
+    timeout: 900
+  #? --- API endpoints ---
+  statistics:
+    handler: api.get-statistics
+    events:
+      - http:
+          path: statistics
+          method: get
+          cors: true
   hello:
-    # handler value syntax is `{cargo-package-name}.{bin-name}`
-    # or `{cargo-package-name}` for short when you are building a
-    # default bin for a given package.
     handler: api.hello-world
     events:
       - http:
@@ -62,32 +79,32 @@ functions:
           path: json
           method: post
           cors: true
-  data_collector:
-    handler: api.data-collector
-    events:
-      - schedule: rate(70 minutes)
-    timeout: 900
+  #? --- Queues ---
   process_job_post:
     handler: api.process-job-post
     events:
       - sqs:
           arn:
             Fn::GetAtt:
+              - GenerateStatisticsQueue
+              - Arn
+    timeout: 120
+  generate_statistics:
+    handler: api.generate-statistics
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
               - JobPostsQueue
               - Arn
-    timeout: 60
+    timeout: 120
+  #? --- Helper lambdas ---
   process_all_job_posts:
     handler: api.process-all-job-posts
-    timeout: 900
+    timeout: 120
   migrate_db:
     handler: api.migrate-db
-  statistics:
-    handler: api.get-statistics
-    events:
-      - http:
-          path: statistics
-          method: get
-          cors: true
+    timeout: 120
 
 resources:
   Resources:
@@ -102,12 +119,28 @@ resources:
           - AttributeName: jobId
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+    StatisticsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: "${opt:stage}-statistics"
+        AttributeDefinitions:
+          - AttributeName: statId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: statId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
     JobPostsQueue:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: "${opt:stage}-job-posts-queue.fifo"
-        VisibilityTimeout: 120
+        VisibilityTimeout: 240
         FifoQueue: true
+    GenerateStatisticsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: "${opt:stage}-generate-statistics-queue"
+        VisibilityTimeout: 240
 
 custom:
   rust:

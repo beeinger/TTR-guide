@@ -1,12 +1,59 @@
-use std::collections::HashMap;
-
 use self::types::{
     LocationStatistics, PositionStatistics, SalaryStatistics, TechStatistics, TypeStatistics,
 };
-
-use super::reed_api::types::JobDetails;
+use super::{
+    db::{self, job_posts::query_for_positions},
+    reed_api::types::JobDetails,
+};
+use std::collections::HashMap;
 
 pub mod types;
+
+pub async fn fetch_and_calculate_position_statistics(
+    positions: Vec<String>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+    count_threshold: Option<u32>,
+) -> Result<PositionStatistics, String> {
+    let all_jobs = query_for_positions(positions.clone(), start_date.clone(), end_date.clone())
+        .await
+        .map_err(|e| {
+            tracing::error!("Error finding all jobs: {:?}", e);
+            format!("{:?}", e)
+        })?;
+
+    let statistics =
+        calculate_position_statistics(positions, start_date, end_date, all_jobs, count_threshold);
+
+    db::statistics::put(statistics.clone()).await.map_err(|e| {
+        tracing::error!("Error putting statistics: {:?}", e);
+        format!("{:?}", e)
+    })?;
+
+    Ok(statistics)
+}
+
+pub fn get_stat_id(
+    positions: Vec<String>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+) -> String {
+    let mut positions = positions;
+    positions.sort();
+    let positions = positions.join(",");
+
+    let start_date = match start_date {
+        Some(start_date) => start_date,
+        None => "None".to_string(),
+    };
+
+    let end_date = match end_date {
+        Some(end_date) => end_date,
+        None => "None".to_string(),
+    };
+
+    format!("{}-{}-{}", positions, start_date, end_date)
+}
 
 pub fn calculate_position_statistics(
     positions: Vec<String>,
@@ -16,6 +63,8 @@ pub fn calculate_position_statistics(
     count_threshold: Option<u32>,
 ) -> PositionStatistics {
     let mut position_statistics = PositionStatistics {
+        stat_id: get_stat_id(positions.clone(), start_date.clone(), end_date.clone()),
+        timestamp: chrono::Utc::now().timestamp(),
         positions,
         start_date,
         end_date,
