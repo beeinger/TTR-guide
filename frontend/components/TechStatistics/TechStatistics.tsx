@@ -22,7 +22,7 @@ export default function TechStatistic({
   return (
     <Container maxPopularity={maxValues.popularity} popularity={popularity}>
       <Popularity>{popularityPercentage}%</Popularity>
-      <Count>{count} jobs</Count>
+      <Count>{count} jobs use it</Count>
       <Title>{tech}</Title>
       <Salary salary={salary_statistics} />
       <LocationAndType

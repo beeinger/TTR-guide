@@ -51,6 +51,7 @@ export default function Salary({ salary }: { salary: SalaryStatistics }) {
       <Median>
         <h4>£{Math.ceil(salary.median / 1000)}k</h4>
         <span>median</span>
+        <span>salary</span>
       </Median>
     </Layout>
   );
