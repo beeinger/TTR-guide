@@ -237,7 +237,7 @@ pub async fn query_for_positions(
         all_job_details.extend(job_details.drain());
     }
 
-    Ok(all_job_details.into_iter().map(|(_, v)| v).collect())
+    Ok(all_job_details.into_values().collect())
 }
 
 async fn query_for_position_chunk(
