@@ -25,7 +25,7 @@ pub async fn process_job(job: JobDetails) -> Result<(), Box<dyn std::error::Erro
         processed: Some(true),
         ..job
     };
-    db::put_many_job_posts(Vec::from([job_update])).await?;
+    db::job_posts::put_many(Vec::from([job_update])).await?;
 
     Ok(())
 }
