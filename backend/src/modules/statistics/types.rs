@@ -23,6 +23,7 @@ pub struct PositionStatistics {
     pub start_date: Option<String>,
     pub end_date: Option<String>,
     pub tech_statistics: Vec<TechStatistics>,
+    pub total_jobs_count: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
