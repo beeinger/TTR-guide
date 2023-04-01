@@ -69,7 +69,7 @@ export default function index({
                   It seems you are <i>the first</i> to request this data!
                 </Info>
                 <span>
-                  Hang tight, we are generating it <i>just for you</i>! 🫡
+                  Hang tight, this might take a wile, we are generating it <i>just for you</i>! 🫡
                 </span>
                 <Spinner>
                   <div></div>
