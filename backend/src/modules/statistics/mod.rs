@@ -1,5 +1,9 @@
-use self::types::{
-    LocationStatistics, PositionStatistics, SalaryStatistics, TechStatistics, TypeStatistics,
+use self::{
+    sqs::add_statistics_to_sqs,
+    types::{
+        GenerateStatisticsMessage, LocationStatistics, PositionStatistics, SalaryStatistics,
+        TechStatistics, TypeStatistics,
+    },
 };
 use super::{
     db::{self, job_posts::query_for_positions},
@@ -7,13 +11,33 @@ use super::{
 };
 use std::collections::HashMap;
 
+pub mod sqs;
 pub mod types;
 
-pub async fn fetch_and_calculate_position_statistics(
+pub async fn queue_statistics_generation(
     positions: Vec<String>,
     start_date: Option<String>,
     end_date: Option<String>,
-    count_threshold: Option<u32>,
+) -> Result<(), String> {
+    let message = GenerateStatisticsMessage {
+        stat_id: get_stat_id(positions.clone(), start_date.clone(), end_date.clone()),
+        positions,
+        start_date,
+        end_date,
+    };
+
+    add_statistics_to_sqs(message).await.map_err(|e| {
+        tracing::error!("Error scheduling statistics generation: {:?}", e);
+        format!("{:?}", e)
+    })?;
+
+    Ok(())
+}
+
+pub async fn calculate_and_save_statistics(
+    positions: Vec<String>,
+    start_date: Option<String>,
+    end_date: Option<String>,
 ) -> Result<PositionStatistics, String> {
     let all_jobs = query_for_positions(positions.clone(), start_date.clone(), end_date.clone())
         .await
@@ -22,10 +46,9 @@ pub async fn fetch_and_calculate_position_statistics(
             format!("{:?}", e)
         })?;
 
-    let statistics =
-        calculate_position_statistics(positions, start_date, end_date, all_jobs, count_threshold);
+    let statistics = calculate_position_statistics(positions, start_date, end_date, all_jobs);
 
-    db::statistics::put(statistics.clone()).await.map_err(|e| {
+    db::statistics::put(&statistics).await.map_err(|e| {
         tracing::error!("Error putting statistics: {:?}", e);
         format!("{:?}", e)
     })?;
@@ -59,8 +82,7 @@ pub fn calculate_position_statistics(
     positions: Vec<String>,
     start_date: Option<String>,
     end_date: Option<String>,
-    all_jobs: Vec<JobDetails>,
-    count_threshold: Option<u32>,
+    mut all_jobs: Vec<JobDetails>,
 ) -> PositionStatistics {
     let mut position_statistics = PositionStatistics {
         stat_id: get_stat_id(positions.clone(), start_date.clone(), end_date.clone()),
@@ -73,7 +95,8 @@ pub fn calculate_position_statistics(
 
     let mut tech_to_statistics = HashMap::new();
     let mut total_count = 0;
-    for job in all_jobs {
+    while !all_jobs.is_empty() {
+        let job = all_jobs.drain(..1).next().unwrap();
         let location_statistics = {
             let mut location_statistics = LocationStatistics {
                 remote: 0,
@@ -260,13 +283,18 @@ pub fn calculate_position_statistics(
                 };
             }
 
+            salary_stats.all.clear();
             tech
         })
-        .filter(|tech| match count_threshold {
-            Some(count_threshold) => tech.count >= count_threshold,
-            None => true,
-        })
-        .collect();
+        .collect::<Vec<TechStatistics>>();
+
+    position_statistics
+        .tech_statistics
+        .sort_by(|a, b| b.count.partial_cmp(&a.count).unwrap());
+
+    if position_statistics.tech_statistics.len() > 1000 {
+        position_statistics.tech_statistics.drain(1000..);
+    }
 
     position_statistics
 }

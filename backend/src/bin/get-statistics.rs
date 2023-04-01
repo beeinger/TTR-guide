@@ -1,9 +1,8 @@
 use api::modules::{
     db::{self},
-    statistics::{self, fetch_and_calculate_position_statistics},
+    statistics::{self, queue_statistics_generation, types::StatisticsApiResponse},
 };
 use lambda_http::{run, service_fn, Body, Error, Request, Response};
-use serde_json::json;
 use url::form_urlencoded;
 
 async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
@@ -16,10 +15,10 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
     if positions.is_empty() {
         positions = vec!["".to_string()];
     }
-    let count_threshold: Option<u32> = query
+    let count_threshold: Option<usize> = query
         .clone()
         .filter(|(key, value)| key == "count_threshold" && value != "")
-        .flat_map(|(_, value)| value.parse::<u32>().ok())
+        .flat_map(|(_, value)| value.parse::<usize>().ok())
         .collect::<Vec<_>>()
         .first()
         .cloned();
@@ -41,34 +40,41 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
     let stat_id = statistics::get_stat_id(positions.clone(), start_date.clone(), end_date.clone());
     let cached_statistics_result = db::statistics::get(stat_id).await;
 
-    let position_statistics = 
-    //? If there is a cached statistics object, use it.
-    if let Ok(cached_statistics) = cached_statistics_result {
-        //? If the cached statistics are less than 24 hours old, return them.
-        if cached_statistics.timestamp + 60 * 60 * 24 > chrono::Utc::now().timestamp() {
-            cached_statistics
+    let mut api_response = StatisticsApiResponse {
+        generation_queued: false,
+        statistics: None,
+    };
+
+    //? Cached statistics object or None
+    api_response.statistics = if let Ok(mut cached_statistics) = cached_statistics_result {
+        //? If the cache is stale, schedule revalidation.
+        if cached_statistics.timestamp + 60 * 60 * 24 <= chrono::Utc::now().timestamp() {
+            api_response.generation_queued = true;
+            queue_statistics_generation(positions.clone(), start_date.clone(), end_date.clone())
+                .await?;
         }
-        //? Otherwise, fetch the latest statistics and update the cache.
-        else {
-            fetch_and_calculate_position_statistics(
-                positions.clone(),
-                start_date.clone(),
-                end_date.clone(),
-                count_threshold,
-            )
-            .await?
+
+        //? If there was a count threshold, remove the excess statistics.
+        if let Some(threshold) = count_threshold {
+            if cached_statistics.tech_statistics.len() > threshold {
+                cached_statistics.tech_statistics.drain(threshold..);
+            }
         }
-    }
-    //? If there is no cached statistics object, fetch the latest statistics and update the cache. 
-    else {
-        fetch_and_calculate_position_statistics(positions, start_date, end_date, count_threshold)
-            .await?
+
+        //? If cache exists return it.
+        Some(cached_statistics)
+    } else {
+        api_response.generation_queued = true;
+        //? If there is no cached statistics object, schedule generation.
+        queue_statistics_generation(positions, start_date, end_date).await?;
+        //? If cache does not exist, return None.
+        None
     };
 
     let resp = Response::builder()
         .status(200)
         .header("content-type", "application/json")
-        .body(Body::from(json!(position_statistics).to_string()))
+        .body(Body::from(serde_json::to_string(&api_response)?))
         .map_err(Box::new)?;
     Ok(resp)
 }

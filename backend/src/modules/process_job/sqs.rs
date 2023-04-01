@@ -1,9 +1,7 @@
+use crate::modules::{config, reed_api::types::JobDetails};
 use rusoto_core::Region;
 use rusoto_sqs::{SendMessageBatchRequest, SendMessageBatchRequestEntry, Sqs, SqsClient};
 use serde_json::to_string;
-use uuid::Uuid;
-
-use crate::modules::{config, reed_api::types::JobDetails};
 
 use super::types::ProcessJobMessage;
 
@@ -22,10 +20,9 @@ pub async fn add_jobs_to_sqs(jobs: Vec<JobDetails>) -> Result<(), Box<dyn std::e
             let message = ProcessJobMessage { job: job.clone() };
             let message_body = to_string(&message)?;
             let entry = SendMessageBatchRequestEntry {
-                id: Uuid::new_v4().to_string(),
+                id: job.job_id.to_string(),
                 message_body,
                 message_group_id: Some(SQS_FIFO_GROUP_ID.to_string()),
-                message_deduplication_id: Some(Uuid::new_v4().to_string()),
                 ..Default::default()
             };
             entries.push(entry);
