@@ -86,18 +86,19 @@ functions:
       - sqs:
           arn:
             Fn::GetAtt:
-              - GenerateStatisticsQueue
+              - JobPostsQueue
               - Arn
     timeout: 120
   generate_statistics:
     handler: api.generate-statistics
+    memorySize: 256
     events:
       - sqs:
           arn:
             Fn::GetAtt:
-              - JobPostsQueue
+              - GenerateStatisticsQueue
               - Arn
-    timeout: 120
+    timeout: 900
   #? --- Helper lambdas ---
   process_all_job_posts:
     handler: api.process-all-job-posts
@@ -139,8 +140,9 @@ resources:
     GenerateStatisticsQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: "${opt:stage}-generate-statistics-queue"
-        VisibilityTimeout: 240
+        QueueName: "${opt:stage}-generate-statistics-queue.fifo"
+        VisibilityTimeout: 1200
+        FifoQueue: true
 
 custom:
   rust:

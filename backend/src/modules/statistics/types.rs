@@ -1,6 +1,20 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GenerateStatisticsMessage {
+    pub stat_id: String,
+    pub positions: Vec<String>,
+    pub start_date: Option<String>,
+    pub end_date: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StatisticsApiResponse {
+    pub generation_queued: bool,
+    pub statistics: Option<PositionStatistics>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PositionStatistics {
     pub stat_id: String,

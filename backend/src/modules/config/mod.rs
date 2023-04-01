@@ -22,3 +22,9 @@ pub fn get_process_job_queue_url() -> String {
     dotenv::dotenv().ok();
     std::env::var("JOB_POSTS_QUEUE_URL").expect("PROCESS_JOB_QUEUE_URL must be set.")
 }
+
+pub fn get_generate_statistics_queue_url() -> String {
+    dotenv::dotenv().ok();
+    std::env::var("GENERATE_STATISTICS_QUEUE_URL")
+        .expect("GENERATE_STATISTICS_QUEUE_URL must be set.")
+}

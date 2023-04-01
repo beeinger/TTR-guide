@@ -36,10 +36,10 @@ pub async fn get(stat_id: String) -> Result<PositionStatistics, Box<dyn Error + 
     }
 }
 
-pub async fn put(stat: PositionStatistics) -> Result<(), Box<dyn Error + Send>> {
+pub async fn put(stat: &PositionStatistics) -> Result<(), Box<dyn Error + Send>> {
     let client = DynamoDbClient::new(Region::EuWest2);
 
-    let item = serde_dynamodb::to_hashmap(&stat).unwrap();
+    let item = serde_dynamodb::to_hashmap(stat).unwrap();
     let input = PutItemInput {
         table_name: get_statistics_table_name(),
         item,
