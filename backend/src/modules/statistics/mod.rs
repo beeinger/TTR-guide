@@ -112,10 +112,6 @@ pub fn calculate_position_statistics(
                         || work_flexibility.contains("flexible")
                     {
                         location_statistics.hybrid += 1;
-                    } else if work_flexibility.contains("site")
-                        || work_flexibility.contains("office")
-                    {
-                        location_statistics.office += 1;
                     } else {
                         location_statistics.office += 1;
                     }
@@ -133,13 +129,10 @@ pub fn calculate_position_statistics(
                 freelance: 0,
             };
 
-            match job.contract_type {
-                Some(contract_type) => {
-                    if contract_type.contains("Temporary") || contract_type.contains("Contract") {
-                        type_statistics.freelance += 1;
-                    };
-                }
-                None => (),
+            if let Some(contract_type) = job.contract_type {
+                if contract_type.contains("Temporary") || contract_type.contains("Contract") {
+                    type_statistics.freelance += 1;
+                };
             };
 
             if job.part_time == Some(true) {
@@ -163,16 +156,13 @@ pub fn calculate_position_statistics(
                 min: 0,
             };
 
-            match match (job.yearly_maximum_salary, job.yearly_minimum_salary) {
+            if let Some(salary) = match (job.yearly_maximum_salary, job.yearly_minimum_salary) {
                 (Some(max), Some(min)) => Some((max + min) / 2.0),
                 (Some(max), None) => Some(max),
                 (None, Some(min)) => Some(min),
                 (None, None) => None,
             } {
-                Some(salary) => {
-                    salary_statistics.all.push(salary);
-                }
-                None => (),
+                salary_statistics.all.push(salary);
             };
 
             salary_statistics
@@ -190,7 +180,7 @@ pub fn calculate_position_statistics(
                 tech_to_statistics
                     .entry(tech.clone())
                     .or_insert(TechStatistics {
-                        tech: tech,
+                        tech,
                         popularity: 0.0,
                         count: 0,
                         location_statistics: LocationStatistics {
@@ -233,8 +223,8 @@ pub fn calculate_position_statistics(
     }
 
     position_statistics.tech_statistics = tech_to_statistics
-        .into_iter()
-        .map(|(_, mut tech)| {
+        .into_values()
+        .map(|mut tech| {
             //? popularity
             tech.popularity = tech.count as f32 / total_count as f32;
 
