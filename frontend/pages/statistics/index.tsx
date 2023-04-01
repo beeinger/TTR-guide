@@ -19,6 +19,8 @@ export default function index({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
 
+  console.log(statistics);
+
   useEffect(() => {
     const refreshData = () => router.replace(router.asPath);
     let timeout: NodeJS.Timeout;
@@ -50,7 +52,12 @@ export default function index({
     <Layout>
       <Header>
         <DateRange />
-        <Position>{position}</Position>
+        <Position>
+          {position}
+          <span>
+            Data based on <b>{statistics?.totalJobsCount}</b> job posts
+          </span>
+        </Position>
         <Sorting />
       </Header>
       <Statistics>
@@ -76,6 +83,22 @@ const Position = styled.h1`
   font-family: "TrapBlack";
   text-transform: uppercase;
   margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  > span {
+    text-transform: none;
+    font-size: 1rem;
+    font-family: "TrapLight";
+    opacity: 0.5;
+
+    > b {
+      font-family: "Trap";
+    }
+  }
 `;
 
 const Layout = styled.div`

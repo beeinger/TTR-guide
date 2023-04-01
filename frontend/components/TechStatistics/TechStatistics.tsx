@@ -22,7 +22,9 @@ export default function TechStatistic({
   return (
     <Container maxPopularity={maxValues.popularity} popularity={popularity}>
       <Popularity>{popularityPercentage}%</Popularity>
-      <Count>{count} jobs use it</Count>
+      <Count>
+        <b>{count}</b> jobs use it
+      </Count>
       <Title>{tech}</Title>
       <Salary salary={salary_statistics} />
       <LocationAndType
@@ -63,4 +65,8 @@ const Count = styled.h3`
   font-family: "TrapLight";
   opacity: 0.5;
   margin-bottom: 8px;
+
+  > b {
+    font-family: "Trap";
+  }
 `;

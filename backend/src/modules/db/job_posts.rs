@@ -278,7 +278,7 @@ async fn query_for_position_chunk(
         expression_attribute_names.insert(position_name_key.clone(), "position".to_string());
 
         filter_expression_parts.push(format!(
-            "contains({}, {}) OR contains(job_title, {}) OR contains(job_description, {})",
+            "contains({}, {}) OR contains(jobTitle, {}) OR contains(jobDescription, {})",
             position_name_key, position_key, position_key, position_key
         ));
     }

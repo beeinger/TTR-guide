@@ -4,10 +4,13 @@ export interface StatisticsResponse {
 }
 
 export interface PositionStatistics {
+  statId: string;
   positions: string[];
   startDate: string | null;
   endDate: string | null;
   techStatistics: TechStatistics[];
+  totalJobsCount: number;
+  timestamp: number;
 }
 
 export interface TechStatistics {
@@ -18,7 +21,6 @@ export interface TechStatistics {
   type_statistics: TypeStatistics;
   salary_statistics: SalaryStatistics;
   popularity_statistics: PopularityStatistics[];
-  total_jobs_count: number;
 }
 
 export interface LocationStatistics {
