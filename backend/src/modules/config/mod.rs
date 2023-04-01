@@ -10,7 +10,7 @@ pub fn get_job_posts_table_name() -> String {
 
 pub fn get_statistics_table_name() -> String {
     dotenv::dotenv().ok();
-    std::env::var("JOB_POSTS_TABLE_NAME").expect("JOB_POSTS_TABLE_NAME must be set.")
+    std::env::var("STATISTICS_TABLE_NAME").expect("STATISTICS_TABLE_NAME must be set.")
 }
 
 pub fn get_gpt_api_key() -> String {
