@@ -114,11 +114,13 @@ const Statistics = styled.div`
 
 export async function getServerSideProps({ res, query }) {
   const preset_position = query?.position || "all";
-  const positions = presets.position[preset_position] || preset_position;
+  const positions = presets.position[preset_position] ?? preset_position;
   const count_threshold = 25;
 
   const start_date = presets.start_date[query?.start_date || "start"] || query?.start_date;
   const end_date = presets.end_date[query?.end_date || "end"] || query?.end_date;
+
+  console.log({ positions, start_date, end_date, count_threshold });
 
   const statistics = await axios
     .get<StatisticsResponse>(
