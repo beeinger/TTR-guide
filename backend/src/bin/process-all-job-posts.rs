@@ -14,7 +14,7 @@ async fn function_handler(event: LambdaEvent<IgnoreEvent>) -> Result<(), Error> 
             }
         };
 
-        tracing::info!("Found not processed job posts {:?}", not_processed);
+        tracing::info!("Found {} not processed job posts.", not_processed.len());
 
         match add_jobs_to_sqs(not_processed).await {
             Ok(_) => tracing::info!("Added jobs to SQS"),
