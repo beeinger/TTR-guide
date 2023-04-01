@@ -1,30 +1,103 @@
+use self::{
+    sqs::add_statistics_to_sqs,
+    types::{
+        GenerateStatisticsMessage, LocationStatistics, PositionStatistics, SalaryStatistics,
+        TechStatistics, TypeStatistics,
+    },
+};
+use super::{
+    db::{self, job_posts::query_for_positions},
+    reed_api::types::JobDetails,
+};
 use std::collections::HashMap;
 
-use self::types::{
-    LocationStatistics, PositionStatistics, SalaryStatistics, TechStatistics, TypeStatistics,
-};
-
-use super::reed_api::types::JobDetails;
-
+pub mod sqs;
 pub mod types;
+
+pub async fn queue_statistics_generation(
+    positions: Vec<String>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+) -> Result<(), String> {
+    let message = GenerateStatisticsMessage {
+        stat_id: get_stat_id(positions.clone(), start_date.clone(), end_date.clone()),
+        positions,
+        start_date,
+        end_date,
+    };
+
+    add_statistics_to_sqs(message).await.map_err(|e| {
+        tracing::error!("Error scheduling statistics generation: {:?}", e);
+        format!("{:?}", e)
+    })?;
+
+    Ok(())
+}
+
+pub async fn calculate_and_save_statistics(
+    positions: Vec<String>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+) -> Result<PositionStatistics, String> {
+    let all_jobs = query_for_positions(positions.clone(), start_date.clone(), end_date.clone())
+        .await
+        .map_err(|e| {
+            tracing::error!("Error finding all jobs: {:?}", e);
+            format!("{:?}", e)
+        })?;
+
+    let statistics = calculate_position_statistics(positions, start_date, end_date, all_jobs);
+
+    db::statistics::put(&statistics).await.map_err(|e| {
+        tracing::error!("Error putting statistics: {:?}", e);
+        format!("{:?}", e)
+    })?;
+
+    Ok(statistics)
+}
+
+pub fn get_stat_id(
+    positions: Vec<String>,
+    start_date: Option<String>,
+    end_date: Option<String>,
+) -> String {
+    let mut positions = positions;
+    positions.sort();
+    let positions = positions.join(",");
+
+    let start_date = match start_date {
+        Some(start_date) => start_date,
+        None => "None".to_string(),
+    };
+
+    let end_date = match end_date {
+        Some(end_date) => end_date,
+        None => "None".to_string(),
+    };
+
+    format!("{}-{}-{}", positions, start_date, end_date)
+}
 
 pub fn calculate_position_statistics(
     positions: Vec<String>,
     start_date: Option<String>,
     end_date: Option<String>,
-    all_jobs: Vec<JobDetails>,
-    count_threshold: Option<u32>,
+    mut all_jobs: Vec<JobDetails>,
 ) -> PositionStatistics {
     let mut position_statistics = PositionStatistics {
+        stat_id: get_stat_id(positions.clone(), start_date.clone(), end_date.clone()),
+        timestamp: chrono::Utc::now().timestamp(),
         positions,
         start_date,
         end_date,
         tech_statistics: Vec::new(),
+        total_jobs_count: all_jobs.len() as u32,
     };
 
     let mut tech_to_statistics = HashMap::new();
     let mut total_count = 0;
-    for job in all_jobs {
+    while !all_jobs.is_empty() {
+        let job = all_jobs.drain(..1).next().unwrap();
         let location_statistics = {
             let mut location_statistics = LocationStatistics {
                 remote: 0,
@@ -40,10 +113,6 @@ pub fn calculate_position_statistics(
                         || work_flexibility.contains("flexible")
                     {
                         location_statistics.hybrid += 1;
-                    } else if work_flexibility.contains("site")
-                        || work_flexibility.contains("office")
-                    {
-                        location_statistics.office += 1;
                     } else {
                         location_statistics.office += 1;
                     }
@@ -61,13 +130,10 @@ pub fn calculate_position_statistics(
                 freelance: 0,
             };
 
-            match job.contract_type {
-                Some(contract_type) => {
-                    if contract_type.contains("Temporary") || contract_type.contains("Contract") {
-                        type_statistics.freelance += 1;
-                    };
-                }
-                None => (),
+            if let Some(contract_type) = job.contract_type {
+                if contract_type.contains("Temporary") || contract_type.contains("Contract") {
+                    type_statistics.freelance += 1;
+                };
             };
 
             if job.part_time == Some(true) {
@@ -91,16 +157,13 @@ pub fn calculate_position_statistics(
                 min: 0,
             };
 
-            match match (job.yearly_maximum_salary, job.yearly_minimum_salary) {
+            if let Some(salary) = match (job.yearly_maximum_salary, job.yearly_minimum_salary) {
                 (Some(max), Some(min)) => Some((max + min) / 2.0),
                 (Some(max), None) => Some(max),
                 (None, Some(min)) => Some(min),
                 (None, None) => None,
             } {
-                Some(salary) => {
-                    salary_statistics.all.push(salary);
-                }
-                None => (),
+                salary_statistics.all.push(salary);
             };
 
             salary_statistics
@@ -118,7 +181,7 @@ pub fn calculate_position_statistics(
                 tech_to_statistics
                     .entry(tech.clone())
                     .or_insert(TechStatistics {
-                        tech: tech,
+                        tech,
                         popularity: 0.0,
                         count: 0,
                         location_statistics: LocationStatistics {
@@ -161,8 +224,8 @@ pub fn calculate_position_statistics(
     }
 
     position_statistics.tech_statistics = tech_to_statistics
-        .into_iter()
-        .map(|(_, mut tech)| {
+        .into_values()
+        .map(|mut tech| {
             //? popularity
             tech.popularity = tech.count as f32 / total_count as f32;
 
@@ -211,13 +274,18 @@ pub fn calculate_position_statistics(
                 };
             }
 
+            salary_stats.all.clear();
             tech
         })
-        .filter(|tech| match count_threshold {
-            Some(count_threshold) => tech.count >= count_threshold,
-            None => true,
-        })
-        .collect();
+        .collect::<Vec<TechStatistics>>();
+
+    position_statistics
+        .tech_statistics
+        .sort_by(|a, b| b.count.partial_cmp(&a.count).unwrap());
+
+    if position_statistics.tech_statistics.len() > 1000 {
+        position_statistics.tech_statistics.drain(1000..);
+    }
 
     position_statistics
 }

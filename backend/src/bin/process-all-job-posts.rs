@@ -1,4 +1,4 @@
-use api::modules::{db::find_not_processed, process_job::sqs::add_jobs_to_sqs};
+use api::modules::{db::job_posts::find_not_processed, process_job::sqs::add_jobs_to_sqs};
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::Deserialize;
 
@@ -14,7 +14,7 @@ async fn function_handler(event: LambdaEvent<IgnoreEvent>) -> Result<(), Error> 
             }
         };
 
-        tracing::info!("Found not processed job posts {:?}", not_processed);
+        tracing::info!("Found {} not processed job posts.", not_processed.len());
 
         match add_jobs_to_sqs(not_processed).await {
             Ok(_) => tracing::info!("Added jobs to SQS"),

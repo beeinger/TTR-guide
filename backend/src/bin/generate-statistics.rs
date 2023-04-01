@@ -1,6 +1,6 @@
 use api::modules::{
-    config::get_process_job_queue_url,
-    process_job::{process_job, types::ProcessJobMessage},
+    config::get_generate_statistics_queue_url,
+    statistics::{calculate_and_save_statistics, types::GenerateStatisticsMessage},
 };
 use aws_lambda_events::event::sqs::SqsEvent;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
@@ -8,18 +8,26 @@ use rusoto_core::Region;
 use rusoto_sqs::{DeleteMessageRequest, Sqs, SqsClient};
 
 async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
+    tracing::info!("Received event: {:?}", event);
     for record in event.payload.records {
         if let Some(body) = record.body {
-            let sqs_message = serde_json::from_str::<ProcessJobMessage>(&body)?;
+            tracing::info!("Processing message: {}", body);
+            let sqs_message = serde_json::from_str::<GenerateStatisticsMessage>(&body)?;
 
-            match process_job(sqs_message.job.clone()).await {
-                Ok(_) => tracing::info!("Processed jobId: {}", sqs_message.job.job_id),
-                Err(e) => tracing::error!("Error processing job: {:?}", e),
+            match calculate_and_save_statistics(
+                sqs_message.positions,
+                sqs_message.start_date,
+                sqs_message.end_date,
+            )
+            .await
+            {
+                Ok(_) => tracing::info!("Processed statId: {}", sqs_message.stat_id),
+                Err(e) => tracing::error!("Error processing stat: {:?}", e),
             }
 
             let sqs_client = SqsClient::new(Region::EuWest2);
             let delete_request = DeleteMessageRequest {
-                queue_url: get_process_job_queue_url(),
+                queue_url: get_generate_statistics_queue_url(),
                 receipt_handle: record.receipt_handle.unwrap(),
             };
             if let Err(e) = sqs_client.delete_message(delete_request).await {

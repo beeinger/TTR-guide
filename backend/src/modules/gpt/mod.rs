@@ -10,7 +10,7 @@ pub mod types;
 pub async fn extract_job_details(
     job_description: &str,
 ) -> Result<types::ExtractedDescription, Box<dyn Error>> {
-    let prompt = "Extract job position (1-2 words, lowercase), tools, technologies, and work flexibility (1 word: remote, on-site, hybrid, flexible) from the job description. Return JSON: {'position': '', 'technologies': [''], 'work_flexibility': ''}. If information is missing, use 'null'.".to_string();
+    let prompt = "Extract job position (1-2 words, lowercase), tools, technologies, and work flexibility (1 word: remote, on-site, hybrid, flexible) from the job description. Return JSON: {\"position\": \"\", \"technologies\": [\"\"], \"work_flexibility\": \"\"}. If information is missing, use 'null'.".to_string();
 
     let preprocessed_description = preprocess::preprocess(job_description)?;
 
@@ -40,11 +40,15 @@ pub async fn extract_job_details(
     });
     let client = reqwest::Client::new();
     let response = client.post(url).headers(headers).json(&body).send().await?;
+
+    tracing::info!("GPT-3 API status: {:?}", response.status());
+
     let response_json: Value = response.json().await?;
+
     let content = response_json["choices"][0]["message"]["content"].as_str();
 
     if let Some(valid_content) = content {
-        let result = valid_content.trim().replace('\'', "\"");
+        let result = valid_content.trim().replace('\'', "\"").to_lowercase();
         let parsed_result: self::types::ExtractedDescription =
             serde_json::from_str(result.as_str())?;
         Ok(parsed_result)
