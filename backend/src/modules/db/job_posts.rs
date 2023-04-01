@@ -228,36 +228,33 @@ pub async fn query_for_positions(
     start_date: Option<String>,
     end_date: Option<String>,
 ) -> Result<Vec<JobDetails>, Box<dyn std::error::Error>> {
-    //? 100 is the max number of constrains in a query, 3 is the number of constrains we do per position
     let chunk_size = 100 / 3;
-    let mut all_job_details: Vec<JobDetails> = Vec::new();
+    let mut all_job_details: HashMap<String, JobDetails> = HashMap::new();
 
     for position_chunk in positions.chunks(chunk_size) {
-        let mut job_details = query_for_position_chunk(
-            position_chunk.to_vec(),
-            start_date.clone(),
-            end_date.clone(),
-        )
-        .await?;
-        all_job_details.append(&mut job_details);
+        let mut job_details =
+            query_for_position_chunk(position_chunk.to_vec(), &start_date, &end_date).await?;
+        all_job_details.extend(job_details.drain());
     }
 
-    Ok(all_job_details)
+    Ok(all_job_details.into_iter().map(|(_, v)| v).collect())
 }
 
 async fn query_for_position_chunk(
     positions: Vec<String>,
-    start_date: Option<String>,
-    end_date: Option<String>,
-) -> Result<Vec<JobDetails>, Box<dyn std::error::Error>> {
+    start_date: &Option<String>,
+    end_date: &Option<String>,
+) -> Result<HashMap<String, JobDetails>, Box<dyn std::error::Error>> {
     let client = DynamoDbClient::new(Region::EuWest2);
     let table_name = config::get_job_posts_table_name();
 
     let start_date = start_date
-        .map(|date| NaiveDate::parse_from_str(&date, "%d/%m/%Y"))
+        .as_ref()
+        .map(|date| NaiveDate::parse_from_str(date, "%d/%m/%Y"))
         .transpose()?;
     let end_date = end_date
-        .map(|date| NaiveDate::parse_from_str(&date, "%d/%m/%Y"))
+        .as_ref()
+        .map(|date| NaiveDate::parse_from_str(date, "%d/%m/%Y"))
         .transpose()?;
 
     let mut expression_attribute_values = HashMap::new();
@@ -293,7 +290,7 @@ async fn query_for_position_chunk(
         ..Default::default()
     };
 
-    let mut job_details: Vec<JobDetails> = Vec::new();
+    let mut job_details: HashMap<String, JobDetails> = HashMap::new();
     let mut last_evaluated_key: Option<HashMap<String, AttributeValue>> = None;
 
     loop {
@@ -305,13 +302,11 @@ async fn query_for_position_chunk(
 
         for item in items {
             if let Ok(job) = serde_dynamodb::from_hashmap::<JobDetails, _>(item) {
-                // Parse the date_posted as a NaiveDate object
                 let job_date_posted = match job.date_posted.clone() {
                     Some(date) => NaiveDate::parse_from_str(&date, "%d/%m/%Y")?,
                     None => continue,
                 };
 
-                // Check if the date_posted falls within the specified range
                 let is_within_range = match (&start_date, &end_date) {
                     (Some(start), Some(end)) => {
                         job_date_posted >= *start && job_date_posted <= *end
@@ -321,9 +316,8 @@ async fn query_for_position_chunk(
                     (None, None) => true,
                 };
 
-                // Only include the job if it falls within the specified range
                 if is_within_range {
-                    job_details.push(job);
+                    job_details.insert(job.job_id.to_string(), job);
                 }
             }
         }
