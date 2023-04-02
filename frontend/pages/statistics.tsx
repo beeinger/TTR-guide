@@ -20,7 +20,7 @@ export default function index({
   useEffect(() => {
     const refreshData = () => router.replace(router.asPath);
     let timeout: NodeJS.Timeout;
-    if (generation_queued) timeout = setTimeout(refreshData, 1000);
+    if (generation_queued) timeout = setTimeout(refreshData, statistics ? 10_000 : 3_000);
     return () => clearTimeout(timeout);
   }, [generation_queued, router]);
 
@@ -46,6 +46,14 @@ export default function index({
 
   return (
     <Layout>
+      {statistics && generation_queued ? (
+        <RegeneratingInBg>
+          getting newest data{" "}
+          <Spinner style={{ transform: "scale(0.4)", opacity: 1, marginLeft: "-16px" }} />
+        </RegeneratingInBg>
+      ) : (
+        false
+      )}
       <Header>
         <DateRange />
         <Position>
@@ -71,12 +79,7 @@ export default function index({
                 <span>
                   Hang tight, this might take a wile, we are generating it <i>just for you</i>! 🫡
                 </span>
-                <Spinner>
-                  <div></div>
-                  <div></div>
-                  <div></div>
-                  <div></div>
-                </Spinner>
+                <Spinner />
               </>
             ) : (
               "Sorry, we have no data on this yet."
@@ -88,6 +91,21 @@ export default function index({
   );
 }
 
+const RegeneratingInBg = styled.div`
+  position: absolute;
+  top: 8px;
+  right: -8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 0.8rem;
+  font-family: "TrapSemBd";
+
+  height: 32px;
+`;
+
 const Info = styled.span`
   font-size: 1.5rem;
   display: block;
@@ -95,7 +113,14 @@ const Info = styled.span`
   font-family: "TrapSemBd";
 `;
 
-const Spinner = styled.div`
+const Spinner = styled((props) => (
+  <div {...props}>
+    <div />
+    <div />
+    <div />
+    <div />
+  </div>
+))`
   opacity: 0.5;
 
   & {
@@ -165,6 +190,7 @@ const NoData = styled.div`
   i {
     font-style: italic;
     font-weight: 600;
+    color: #00c8f8;
   }
 `;
 
@@ -175,6 +201,7 @@ const Header = styled.div`
   width: 100%;
   box-sizing: border-box;
   padding: 0 5vw;
+  justify-self: flex-start;
 `;
 
 const Position = styled.h1`
@@ -182,6 +209,8 @@ const Position = styled.h1`
   font-family: "TrapBlack";
   text-transform: uppercase;
   margin: 0;
+  margin-top: 5vh;
+  margin-bottom: 5vh;
 
   display: flex;
   flex-direction: column;
@@ -205,7 +234,7 @@ const Layout = styled.div`
   flex-direction: column;
   align-items: center;
   height: fit-content;
-  justify-content: space-evenly;
+  justify-content: center;
   min-height: 100vh;
 `;
 
@@ -242,8 +271,6 @@ export async function getServerSideProps({ res, query }) {
   const start_date = presets.start_date[query?.start_date || "start"] || query?.start_date;
   const end_date = presets.end_date[query?.end_date || "end"] || query?.end_date;
 
-  console.log({ positions, start_date, end_date, count_threshold });
-
   const statistics = await axios
     .get<StatisticsResponse>(
       "https://i8gd9ajvp7.execute-api.eu-west-2.amazonaws.com/dev/statistics",
@@ -270,7 +297,12 @@ export async function getServerSideProps({ res, query }) {
 }
 
 const presets = {
-  position: { all: "", frontend: "frontend,front-end,front,css" },
+  position: {
+    all: "",
+    frontend: "frontend,front-end,front,css,react,vue,angular,html",
+    backend: "backend,back-end,back,php,node,express,rust,sql",
+    fullstack: "fullstack,full-stack,full,full-stack",
+  },
   start_date: { start: "" },
   end_date: { end: "" },
 };
