@@ -190,6 +190,7 @@ const NoData = styled.div`
   i {
     font-style: italic;
     font-weight: 600;
+    color: #00c8f8;
   }
 `;
 
@@ -270,8 +271,6 @@ export async function getServerSideProps({ res, query }) {
   const start_date = presets.start_date[query?.start_date || "start"] || query?.start_date;
   const end_date = presets.end_date[query?.end_date || "end"] || query?.end_date;
 
-  console.log({ positions, start_date, end_date, count_threshold });
-
   const statistics = await axios
     .get<StatisticsResponse>(
       "https://i8gd9ajvp7.execute-api.eu-west-2.amazonaws.com/dev/statistics",
@@ -298,7 +297,12 @@ export async function getServerSideProps({ res, query }) {
 }
 
 const presets = {
-  position: { all: "", frontend: "frontend,front-end,front,css" },
+  position: {
+    all: "",
+    frontend: "frontend,front-end,front,css,react,vue,angular,html",
+    backend: "backend,back-end,back,php,node,express,rust,sql",
+    fullstack: "fullstack,full-stack,full,full-stack",
+  },
   start_date: { start: "" },
   end_date: { end: "" },
 };
