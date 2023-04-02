@@ -12,7 +12,7 @@ export default function useSorting(_techStatistics: TechStatistics[]) {
   const [sorting, setSorting] = useState<keyof typeof sortingFunctions>("popularityDesc");
   const sortingFunction = useCallback(sortingFunctions[sorting], [sorting]);
   const techStatistics = useMemo(
-    () => _techStatistics?.sort(sortingFunction) || [],
+    () => _techStatistics?.filter((value) => value.tech !== "null").sort(sortingFunction) || [],
     [_techStatistics, sortingFunction]
   );
 
