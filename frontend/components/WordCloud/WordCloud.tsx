@@ -29,7 +29,7 @@ export default function WordCloud() {
   const router = useRouter();
   const callbacks = {
     onWordClick: (word) => router.push(word.link),
-    getWordTooltip: (word) => `${word.text} - ${word.value} indexed job posts`,
+    getWordTooltip: (word) => `${word.text} statistics`,
   };
 
   return (
