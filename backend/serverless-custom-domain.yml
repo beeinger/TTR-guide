@@ -1,0 +1,22 @@
+service: certificate-us-east-1
+
+provider:
+  name: aws
+  region: us-east-1
+
+resources:
+  Resources:
+    ApiCertificate:
+      Type: AWS::CertificateManager::Certificate
+      Properties:
+        DomainName: "api.ttr.guide"
+        ValidationMethod: DNS
+        DomainValidationOptions:
+          - DomainName: "api.ttr.guide"
+            HostedZoneId: Z06696302175U3YP6F7BE
+  Outputs:
+    ApiCertificateArn:
+      Description: The ARN of the ACM certificate
+      Value: !Ref ApiCertificate
+      Export:
+        Name: ApiCertificateArn
