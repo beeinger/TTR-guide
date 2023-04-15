@@ -272,12 +272,9 @@ export async function getServerSideProps({ res, query }) {
   const end_date = presets.end_date[query?.end_date || "end"] || query?.end_date;
 
   const statistics = await axios
-    .get<StatisticsResponse>(
-      "https://i8gd9ajvp7.execute-api.eu-west-2.amazonaws.com/dev/statistics",
-      {
-        params: { positions, start_date, end_date, count_threshold },
-      }
-    )
+    .get<StatisticsResponse>("https://api.ttr.guide/statistics", {
+      params: { positions, start_date, end_date, count_threshold },
+    })
     .then((res) => res.data)
     .catch((err) => {
       console.log(err.response);

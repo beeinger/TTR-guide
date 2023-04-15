@@ -5,7 +5,7 @@ provider:
   runtime: rust
   memorySize: 128
   timeout: 20
-  stage: dev
+  stage: ${opt:stage, 'dev'}
   region: eu-west-2
   environment:
     JOB_POSTS_TABLE_NAME:
@@ -49,6 +49,7 @@ package:
 plugins:
   - serverless-rust
   - serverless-dotenv-plugin
+  - serverless-domain-manager
 
 functions:
   #? --- CRONs ---
@@ -147,3 +148,9 @@ resources:
 custom:
   rust:
     dockerless: true
+  customDomain:
+    domainName: api.ttr.guide
+    basePath: ""
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+    certificateArn: arn:aws:acm:us-east-1:097371206778:certificate/e2424adc-5750-4625-9363-ae98df5c6fae
