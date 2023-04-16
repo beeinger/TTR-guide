@@ -92,7 +92,7 @@ functions:
     timeout: 120
   generate_statistics:
     handler: api.generate-statistics
-    memorySize: 256
+    memorySize: 1024
     events:
       - sqs:
           arn:
