@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { StatisticsResponse } from "shared/types";
 import { InferGetServerSidePropsType } from "next";
 import TechStatistic from "components/TechStatistics";
@@ -8,6 +8,8 @@ import useSorting from "shared/hooks/useSorting";
 import DateRange from "components/DateRange";
 import Sorting from "components/Sorting";
 import { useRouter } from "next/router";
+import ScrollButton from "components/ScrollButton/ScrollButton";
+import useScroll from "shared/hooks/useScroll";
 
 export default function index({
   error,
@@ -16,6 +18,7 @@ export default function index({
   statistics,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { scroll, leftVisible, rightVisible, ref, updateVisibilityOfArrows } = useScroll();
 
   useEffect(() => {
     const refreshData = () => router.replace(router.asPath);
@@ -64,7 +67,8 @@ export default function index({
         </Position>
         <Sorting />
       </Header>
-      <Statistics>
+      <ScrollButton visible={leftVisible} type="left" onClick={scroll(-400)} />
+      <Statistics ref={ref} onScroll={updateVisibilityOfArrows}>
         {techStatistics.length ? (
           techStatistics.map((tech) => (
             <TechStatistic key={tech.tech} tech={tech} maxValues={maxValues} />
@@ -87,6 +91,7 @@ export default function index({
           </NoData>
         )}
       </Statistics>
+      <ScrollButton visible={rightVisible} type="right" onClick={scroll(400)} />
     </Layout>
   );
 }
