@@ -14,10 +14,10 @@ export default function IndexPage() {
         <div>
           <Subtitle>
             An all in one platform empowering users with powerful <b>visualisations</b> and{" "}
-            <b>analytics</b> for better, <b>informed choice</b> of tools and technologies. Whether
+            <b>analytics</b> for better, <b>informed choices</b> of tools and technologies. Whether
             you're considering what to learn, teach or just use, here, you will be able to find
             answers based on <b>data</b> coming straight <b>from job posts</b>, from what the{" "}
-            <b>industry</b> needs and uses.
+            <b>industry</b> requires.
           </Subtitle>
           <Button onClick={() => router.push("/search")}>
             Start your research <BsArrowRight />
@@ -54,7 +54,7 @@ const Container = styled.div`
   padding: 0px 64px;
   /* Phone screen */
   @media (max-width: 600px) {
-    padding-left: 0px 16px;
+    padding: 0px 16px;
   }
 
   position: relative;
