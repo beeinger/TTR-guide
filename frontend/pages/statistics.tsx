@@ -21,6 +21,11 @@ export default function index({
   const { scroll, leftVisible, rightVisible, ref, updateVisibilityOfArrows } = useScroll();
 
   useEffect(() => {
+    if (window.localStorage && statistics?.totalJobsCount)
+      window.localStorage.setItem(position + "Count", statistics.totalJobsCount.toString());
+  }, []);
+
+  useEffect(() => {
     const refreshData = () => router.replace(router.asPath);
     let timeout: NodeJS.Timeout;
     if (generation_queued) timeout = setTimeout(refreshData, statistics ? 10_000 : 3_000);
