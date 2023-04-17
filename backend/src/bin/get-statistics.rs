@@ -70,6 +70,7 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
     let resp = Response::builder()
         .status(200)
         .header("content-type", "application/json")
+        .header("Access-Control-Allow-Origin", "*")
         .body(Body::from(serde_json::to_string(&api_response)?))
         .map_err(Box::new)?;
     Ok(resp)
