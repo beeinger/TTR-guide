@@ -1,10 +1,14 @@
 import styled from "@emotion/styled";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useCallback } from "react";
 import { BsArrowRight, BsGithub, BsHeartFill } from "react-icons/bs";
+import { HiOutlineDocumentChartBar } from "react-icons/hi2";
 
 export default function IndexPage() {
-  const router = useRouter();
+  const router = useRouter(),
+    goToSearch = useCallback(() => router.push("/search"), [router.push]);
+
   return (
     <Container>
       <Body>
@@ -19,9 +23,15 @@ export default function IndexPage() {
             answers based on <b>data</b> coming straight <b>from job posts</b>, from what the{" "}
             <b>industry</b> requires.
           </Subtitle>
-          <Button onClick={() => router.push("/search")}>
-            Start your research <BsArrowRight />
-          </Button>
+          <Buttons>
+            <Button onClick={goToSearch}>
+              Start your research <BsArrowRight />
+            </Button>
+            <Link href="/api-docs">
+              <HiOutlineDocumentChartBar />
+              <span>API documentation</span>
+            </Link>
+          </Buttons>
         </div>
         <Info>
           <b>Notice that currently</b> the dataset is limited mostly to programming/engineering and
@@ -42,6 +52,42 @@ export default function IndexPage() {
     </Container>
   );
 }
+
+const Buttons = styled.div`
+  margin-top: 16px;
+
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  align-items: center;
+  justify-content: flex-start;
+
+  > a {
+    font-size: 1.1rem;
+    font-family: "Trap";
+    text-decoration: none;
+    color: #00c8f8;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    > span {
+      margin-bottom: -0.2em;
+    }
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 16px;
+    justify-content: center;
+    align-items: flex-start;
+  }
+`;
 
 const Container = styled.div`
   display: flex;
@@ -98,7 +144,6 @@ const Button = styled.button`
   font-size: 1.5rem;
   font-family: "Trap";
 
-  margin-top: 16px;
   max-width: 50%;
   padding: 16px 32px;
   border-radius: 8px;
