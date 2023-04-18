@@ -85,7 +85,7 @@ const Container = styled.div`
   margin-top: 5vh;
   margin-bottom: 5vh;
 
-  @media (max-width: 1100px) {
+  @media (max-width: 1250px) {
     margin-top: 2vh;
     margin-bottom: 2vh;
   }
@@ -100,7 +100,7 @@ const Container = styled.div`
     font-size: 12px;
     color: #666;
 
-    @media (max-width: 1100px) {
+    @media (max-width: 1250px) {
       font-size: 9px;
     }
   }
