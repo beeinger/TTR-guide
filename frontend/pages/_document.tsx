@@ -23,7 +23,7 @@ class MyDocument extends Document {
 
   render() {
     return (
-      <Html>
+      <Html lang="en-gb">
         <Head>
           {/* <!--  Basic Tags --> */}
           <link rel="icon" href="/icons/favicon.ico" />

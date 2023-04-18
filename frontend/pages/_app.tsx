@@ -1,5 +1,4 @@
 import "shared/fonts/Trap.css";
-import "shared/fonts/MakeSans.css";
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import NextProgress from "next-progress";

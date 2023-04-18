@@ -126,7 +126,7 @@ const Info = styled.p`
 
   > b {
     opacity: 1;
-    color: #ff0000;
+    color: #ff6666;
   }
 
   > i {

@@ -23,13 +23,18 @@ export default function Logo({
         alt={"Tools and Technologies Research guide"}
         width={p.width * scale}
         height={p.height * scale}
+        priority={true}
         {...props}
       />
     </Link>
   );
 }
 
-const LogoStyle = styled(Image)<{ right?: boolean }>`
+const LogoStyle = styled(({ right, ...rest }: any) => (
+  <Image src={rest.src} alt={rest.alt} {...rest} />
+))<{
+  right?: boolean;
+}>`
   position: absolute;
   top: 16px;
   cursor: pointer;
