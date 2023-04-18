@@ -5,6 +5,8 @@ import { AiOutlineCopy } from "react-icons/ai";
 import { StatisticsResponse } from "shared/types";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import atelierDuneDark from "shared/dark-theme";
+import Head from "next/head";
+import { shortTitle } from "./_document";
 
 const onChangeWrapper =
   (setter: (value: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -64,6 +66,9 @@ export default function Api() {
 
   return (
     <>
+      <Head>
+        <title>{`API Docs - ${shortTitle}`}</title>
+      </Head>
       <APIUrl title="copy API url">
         API Url:{" "}
         <span onClick={copy(API_URL)}>
@@ -414,6 +419,9 @@ const QueryParams = styled.div`
 `;
 
 const Endpoint = styled.h2`
+  margin-top: 0px;
+  margin-bottom: 16px;
+
   display: flex;
   align-items: center;
   gap: 8px;
@@ -434,12 +442,14 @@ const Endpoint = styled.h2`
 `;
 
 const APIUrl = styled.h1`
+  margin-top: 32px;
+  margin-left: 24px;
+
   font-size: 2.5rem;
   color: #00c8f8;
 
-  padding: 0 24px;
   @media (max-width: 600px) {
-    padding: 0 16px;
+    margin-left: 16px;
   }
 
   > span {
