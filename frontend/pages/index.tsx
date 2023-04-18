@@ -181,7 +181,7 @@ const Title = styled.h1`
   max-width: 90%;
   margin: 16px 0;
 
-  @media (max-width: 1100px) {
+  @media (max-width: 1250px) {
     font-size: 3rem;
   }
 
@@ -203,7 +203,7 @@ const Subtitle = styled.h2`
 
   max-width: 70%;
 
-  @media (max-width: 1100px) {
+  @media (max-width: 1250px) {
     font-size: 1.5rem;
     max-width: 80%;
   }

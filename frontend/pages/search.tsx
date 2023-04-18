@@ -122,7 +122,7 @@ const KeywordInput = styled.input`
     outline: none;
   }
 
-  @media (max-width: 1100px) {
+  @media (max-width: 1250px) {
     max-width: 90%;
     font-size: 0.8rem;
   }
@@ -147,7 +147,7 @@ const Container = styled.div`
     font-weight: 900;
     margin-bottom: 0px;
 
-    @media (max-width: 1100px) {
+    @media (max-width: 1250px) {
       font-size: 2rem;
     }
 
@@ -157,7 +157,7 @@ const Container = styled.div`
   }
 
   > h2 {
-    @media (max-width: 1100px) {
+    @media (max-width: 1250px) {
       font-size: 1.2rem;
     }
 
@@ -167,7 +167,7 @@ const Container = styled.div`
   }
 
   > span {
-    @media (max-width: 1100px) {
+    @media (max-width: 1250px) {
       font-size: 0.8rem;
     }
 
