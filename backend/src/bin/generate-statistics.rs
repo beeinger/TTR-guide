@@ -9,20 +9,28 @@ use rusoto_sqs::{DeleteMessageRequest, Sqs, SqsClient};
 
 async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     tracing::info!("Received event: {:?}", event);
+    let mut processed_stat_ids = Vec::new();
+
     for record in event.payload.records {
         if let Some(body) = record.body {
             tracing::info!("Processing message: {}", body);
             let sqs_message = serde_json::from_str::<GenerateStatisticsMessage>(&body)?;
 
-            match calculate_and_save_statistics(
-                sqs_message.positions,
-                sqs_message.start_date,
-                sqs_message.end_date,
-            )
-            .await
-            {
-                Ok(_) => tracing::info!("Processed statId: {}", sqs_message.stat_id),
-                Err(e) => tracing::error!("Error processing stat: {:?}", e),
+            if processed_stat_ids.contains(&sqs_message.stat_id) {
+                tracing::info!("Already processed statId: {}", sqs_message.stat_id);
+            } else {
+                processed_stat_ids.push(sqs_message.stat_id.clone());
+
+                match calculate_and_save_statistics(
+                    sqs_message.positions,
+                    sqs_message.start_date,
+                    sqs_message.end_date,
+                )
+                .await
+                {
+                    Ok(_) => tracing::info!("Processed statId: {}", sqs_message.stat_id),
+                    Err(e) => tracing::error!("Error processing stat: {:?}", e),
+                }
             }
 
             let sqs_client = SqsClient::new(Region::EuWest2);

@@ -8,6 +8,10 @@ import useSorting from "shared/hooks/useSorting";
 import DateRange from "components/DateRange";
 import Sorting from "components/Sorting";
 import { useRouter } from "next/router";
+import ScrollButton from "components/ScrollButton/ScrollButton";
+import useScroll from "shared/hooks/useScroll";
+import Head from "next/head";
+import { shortTitle } from "./_document";
 
 export default function index({
   error,
@@ -16,6 +20,12 @@ export default function index({
   statistics,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { scroll, leftVisible, rightVisible, ref, updateVisibilityOfArrows } = useScroll();
+
+  useEffect(() => {
+    if (window.localStorage && statistics?.totalJobsCount)
+      window.localStorage.setItem(position + "Count", statistics.totalJobsCount.toString());
+  }, []);
 
   useEffect(() => {
     const refreshData = () => router.replace(router.asPath);
@@ -45,49 +55,59 @@ export default function index({
   if (error) return <div>error</div>;
 
   return (
-    <Layout>
-      {statistics && generation_queued ? (
-        <RegeneratingInBg>
-          getting newest data{" "}
-          <Spinner style={{ transform: "scale(0.4)", opacity: 1, marginLeft: "-16px" }} />
-        </RegeneratingInBg>
-      ) : (
-        false
-      )}
-      <Header>
-        <DateRange />
-        <Position>
-          {position.split(",").join(", ")}
-          <span>
-            based on <b>{statistics?.totalJobsCount ?? "-"}</b> job posts
-          </span>
-        </Position>
-        <Sorting />
-      </Header>
-      <Statistics>
-        {techStatistics.length ? (
-          techStatistics.map((tech) => (
-            <TechStatistic key={tech.tech} tech={tech} maxValues={maxValues} />
-          ))
+    <>
+      <Head>
+        <title>{`Statistics for ${position.split(",").join(", ")} - ${shortTitle}`}</title>
+      </Head>
+      <Layout>
+        {statistics && generation_queued ? (
+          <RegeneratingInBg>
+            getting newest data{" "}
+            <Spinner style={{ transform: "scale(0.4)", opacity: 1, marginLeft: "-16px" }} />
+          </RegeneratingInBg>
         ) : (
-          <NoData>
-            {generation_queued ? (
-              <>
-                <Info>
-                  It seems you are <i>the first</i> to request this data!
-                </Info>
-                <span>
-                  Hang tight, this might take a wile, we are generating it <i>just for you</i>! 🫡
-                </span>
-                <Spinner />
-              </>
-            ) : (
-              "Sorry, we have no data on this yet."
-            )}
-          </NoData>
+          false
         )}
-      </Statistics>
-    </Layout>
+        <Header>
+          <DateRange />
+          <Position>
+            {position.split(",").join(", ")}
+            <span>
+              based on <b>{statistics?.totalJobsCount ?? "-"}</b> job posts
+            </span>
+          </Position>
+          <Sorting setSorting={setSorting} />
+        </Header>
+        <div style={{ position: "relative", maxWidth: "100%" }}>
+          <ScrollButton visible={leftVisible} type="left" onClick={scroll(-400)} />
+          <Statistics ref={ref} onScroll={updateVisibilityOfArrows}>
+            {techStatistics.length ? (
+              techStatistics.map((tech) => (
+                <TechStatistic key={tech.tech} tech={tech} maxValues={maxValues} />
+              ))
+            ) : (
+              <NoData>
+                {generation_queued ? (
+                  <>
+                    <Info>
+                      It seems you are <i>the first</i> to request this data!
+                    </Info>
+                    <span>
+                      Hang tight, this might take a wile, we are generating it <i>just for you</i>!
+                      🫡
+                    </span>
+                    <Spinner />
+                  </>
+                ) : (
+                  "Sorry, we have no data on this yet."
+                )}
+              </NoData>
+            )}
+          </Statistics>
+          <ScrollButton visible={rightVisible} type="right" onClick={scroll(400)} />
+        </div>
+      </Layout>
+    </>
   );
 }
 
@@ -195,9 +215,21 @@ const NoData = styled.div`
 `;
 
 const Header = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 0.5fr 1fr 0.5fr;
+  grid-template-rows: 1fr;
+  grid-template-areas: "date position sorting";
+
+  @media (max-width: 800px) {
+    grid-template-columns: 1fr;
+    //! Until date component is not ready it's not taking space
+    grid-template-rows: 1fr 0.5fr 0fr;
+    grid-template-areas:
+      "position"
+      "sorting"
+      "date";
+  }
+
   width: 100%;
   box-sizing: border-box;
   padding: 0 5vw;
@@ -205,6 +237,8 @@ const Header = styled.div`
 `;
 
 const Position = styled.h1`
+  grid-area: position;
+
   font-size: 4rem;
   font-family: "TrapBlack";
   text-transform: uppercase;
@@ -230,12 +264,13 @@ const Position = styled.h1`
 `;
 
 const Layout = styled.div`
+  margin-top: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   height: fit-content;
   justify-content: center;
-  min-height: 100vh;
+  min-height: calc(100vh - 16px);
 `;
 
 const Statistics = styled.div`
@@ -272,12 +307,9 @@ export async function getServerSideProps({ res, query }) {
   const end_date = presets.end_date[query?.end_date || "end"] || query?.end_date;
 
   const statistics = await axios
-    .get<StatisticsResponse>(
-      "https://i8gd9ajvp7.execute-api.eu-west-2.amazonaws.com/dev/statistics",
-      {
-        params: { positions, start_date, end_date, count_threshold },
-      }
-    )
+    .get<StatisticsResponse>("https://api.ttr.guide/statistics", {
+      params: { positions, start_date, end_date, count_threshold },
+    })
     .then((res) => res.data)
     .catch((err) => {
       console.log(err.response);

@@ -5,6 +5,7 @@
   font-style: normal;
   font-weight: normal;
   text-rendering: optimizeLegibility;
+  font-display: swap;
 }
 
 /* Webfont: Trap-Bold */
@@ -14,6 +15,7 @@
   font-style: normal;
   font-weight: bold;
   text-rendering: optimizeLegibility;
+  font-display: swap;
 }
 
 /* Webfont: Trap-ExtraBold */
@@ -23,6 +25,7 @@
   font-style: normal;
   font-weight: normal;
   text-rendering: optimizeLegibility;
+  font-display: swap;
 }
 
 /* Webfont: Trap-Light */
@@ -32,6 +35,7 @@
   font-style: normal;
   font-weight: normal;
   text-rendering: optimizeLegibility;
+  font-display: swap;
 }
 
 /* Webfont: Trap-Medium */
@@ -41,6 +45,7 @@
   font-style: normal;
   font-weight: normal;
   text-rendering: optimizeLegibility;
+  font-display: swap;
 }
 
 /* Webfont: Trap-Regular */
@@ -50,6 +55,7 @@
   font-style: normal;
   font-weight: normal;
   text-rendering: optimizeLegibility;
+  font-display: swap;
 }
 
 /* Webfont: Trap-SemiBold */
@@ -59,4 +65,5 @@
   font-style: normal;
   font-weight: normal;
   text-rendering: optimizeLegibility;
+  font-display: swap;
 }

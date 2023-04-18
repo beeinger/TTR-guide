@@ -1,4 +1,5 @@
 export const title = "TTR Guide - Tools and Technologies Research guide",
+  shortTitle = "TTR Guide",
   keywords = "TTR, Tools, Technologies, Research, guide, TTR.Guide",
   name = "TTR Guide",
   description =
@@ -14,9 +15,7 @@ import Document, {
 } from "next/document";
 
 class MyDocument extends Document {
-  static async getInitialProps(
-    ctx: DocumentContext
-  ): Promise<DocumentInitialProps> {
+  static async getInitialProps(ctx: DocumentContext): Promise<DocumentInitialProps> {
     const initialProps = await Document.getInitialProps(ctx);
 
     return initialProps;
@@ -24,11 +23,10 @@ class MyDocument extends Document {
 
   render() {
     return (
-      <Html>
+      <Html lang="en-gb">
         <Head>
           {/* <!--  Basic Tags --> */}
-          <title>{title}</title>
-          <link rel="icon" href="/favicon.ico" />
+          <link rel="icon" href="/icons/favicon.ico" />
           <meta charSet="UTF-8" />
           <meta name="description" content={description} />
           <meta name="keywords" content={keywords} />
@@ -36,10 +34,7 @@ class MyDocument extends Document {
           {/* <!--  Essential META Tags --> */}
           <meta property="og:title" content={title} />
           <meta property="og:type" content="website" />
-          <meta
-            property="og:image"
-            content="https://ttr.guide/metadata/miniature.png"
-          />
+          <meta property="og:image" content="https://ttr.guide/icons/miniature.png" />
           <meta property="og:url" content="https://ttr.guide/" />
           <meta name="twitter:card" content="summary_large_image" />
 
@@ -47,6 +42,17 @@ class MyDocument extends Document {
           <meta property="og:description" content={description} />
           <meta property="og:site_name" content={name} />
           <meta name="twitter:image:alt" content="-" />
+
+          {/* <!--  Favicons --> */}
+          <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+          <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+          <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+          <link rel="manifest" href="/icons/site.webmanifest" />
+          <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#00c8f8" />
+          <link rel="shortcut icon" href="/icons/favicon.ico" />
+          <meta name="msapplication-TileColor" content="#000000" />
+          <meta name="msapplication-config" content="/icons/browserconfig.xml" />
+          <meta name="theme-color" content="#00c8f8" />
         </Head>
         <body>
           <Main />

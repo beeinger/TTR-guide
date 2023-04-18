@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { useRouter } from "next/router";
+import { useLayoutEffect, useMemo, useState } from "react";
 import ReactWordcloud from "react-wordcloud";
 
 const words = [
@@ -27,15 +28,25 @@ const words = [
 
 export default function WordCloud() {
   const router = useRouter();
+
+  const wordCount = useMemo(
+    () =>
+      words.map((word) => ({
+        ...word,
+        value: Number(window.localStorage.getItem(word.text + "Count")) || word.value,
+      })),
+    []
+  );
+
   const callbacks = {
     onWordClick: (word) => router.push(word.link),
-    getWordTooltip: (word) => `${word.text} - ${word.value} indexed job posts`,
+    getWordTooltip: (word) => `based on ${word.value} jobs`,
   };
 
   return (
     <Container>
       <ReactWordcloud
-        words={words}
+        words={wordCount}
         options={{
           rotationAngles: [0, 0],
           rotations: 0,

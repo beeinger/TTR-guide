@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { TechStatistics } from "shared/types";
 
 const sortingFunctions = {
@@ -8,13 +8,30 @@ const sortingFunctions = {
   highestMedianSalaryAsc: (a, b) => a.salary_statistics.median - b.salary_statistics.median,
 };
 
+const filterAndSort = (techStatistics: TechStatistics[], sortingFunction: (a, b) => number) =>
+  techStatistics?.filter((value) => !EXCLUSIONS.includes(value.tech)).sort(sortingFunction) || [];
+
 export default function useSorting(_techStatistics: TechStatistics[]) {
   const [sorting, setSorting] = useState<keyof typeof sortingFunctions>("popularityDesc");
-  const sortingFunction = useCallback(sortingFunctions[sorting], [sorting]);
-  const techStatistics = useMemo(
-    () => _techStatistics?.filter((value) => value.tech !== "null").sort(sortingFunction) || [],
-    [_techStatistics, sortingFunction]
+  const [techStatistics, setTechStatistics] = useState(() =>
+    filterAndSort(_techStatistics, sortingFunctions[sorting])
+  );
+
+  useEffect(
+    () => setTechStatistics(filterAndSort(_techStatistics, sortingFunctions[sorting])),
+    [_techStatistics, sorting]
   );
 
   return [techStatistics, setSorting] as const;
 }
+
+const EXCLUSIONS = [
+  "null",
+  "iphone",
+  "smartphone",
+  "ios",
+  "android",
+  "azur",
+  "network",
+  "software",
+];

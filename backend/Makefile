@@ -7,6 +7,12 @@ invoke-data-collector:
 #? Deploying to AWS
 deploy:
 	@sls deploy --stage dev
+#? When deploying first time, acquire the certificate, then paste the sertificate ARN to the serverless.yml customDomain.certificateArn
+get-certifiate:
+	@sls deploy -c serverless-custom-domain.yml
+#? after get-certifiate, run this command to deploy the domain
+create-domain:
+	@sls create_domain --stage dev
 d-invoke-data-collector: 
 	@sls invoke -f data_collector -d "{}" --stage dev
 d-logs-data-collector:

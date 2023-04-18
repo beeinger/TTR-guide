@@ -1,10 +1,15 @@
 import styled from "@emotion/styled";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useCallback } from "react";
 import { BsArrowRight, BsGithub, BsHeartFill } from "react-icons/bs";
+import { HiOutlineDocumentChartBar } from "react-icons/hi2";
 
 export default function IndexPage() {
-  const router = useRouter();
+  const router = useRouter(),
+    goToSearch = useCallback(() => router.push("/search"), [router.push]);
+
   return (
     <Container>
       <Body>
@@ -14,14 +19,20 @@ export default function IndexPage() {
         <div>
           <Subtitle>
             An all in one platform empowering users with powerful <b>visualisations</b> and{" "}
-            <b>analytics</b> for better, <b>informed choice</b> of tools and technologies. Whether
+            <b>analytics</b> for better, <b>informed choices</b> of tools and technologies. Whether
             you're considering what to learn, teach or just use, here, you will be able to find
             answers based on <b>data</b> coming straight <b>from job posts</b>, from what the{" "}
-            <b>industry</b> needs and uses.
+            <b>industry</b> requires.
           </Subtitle>
-          <Button onClick={() => router.push("/search")}>
-            Start your research <BsArrowRight />
-          </Button>
+          <Buttons>
+            <Button onClick={goToSearch}>
+              Start your research <BsArrowRight />
+            </Button>
+            <Link href="/api-docs">
+              <HiOutlineDocumentChartBar />
+              <span>API documentation</span>
+            </Link>
+          </Buttons>
         </div>
         <Info>
           <b>Notice that currently</b> the dataset is limited mostly to programming/engineering and
@@ -43,6 +54,42 @@ export default function IndexPage() {
   );
 }
 
+const Buttons = styled.div`
+  margin-top: 16px;
+
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  align-items: center;
+  justify-content: flex-start;
+
+  > a {
+    font-size: 1.1rem;
+    font-family: "Trap";
+    text-decoration: none;
+    color: #00c8f8;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    > span {
+      margin-bottom: -0.2em;
+    }
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 16px;
+    justify-content: center;
+    align-items: flex-start;
+  }
+`;
+
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -54,7 +101,7 @@ const Container = styled.div`
   padding: 0px 64px;
   /* Phone screen */
   @media (max-width: 600px) {
-    padding-left: 0px 16px;
+    padding: 0px 16px;
   }
 
   position: relative;
@@ -79,7 +126,7 @@ const Info = styled.p`
 
   > b {
     opacity: 1;
-    color: #ff0000;
+    color: #ff6666;
   }
 
   > i {
@@ -98,7 +145,6 @@ const Button = styled.button`
   font-size: 1.5rem;
   font-family: "Trap";
 
-  margin-top: 16px;
   max-width: 50%;
   padding: 16px 32px;
   border-radius: 8px;
