@@ -82,12 +82,26 @@ const Container = styled.div`
 
   width: 100%;
 
-  margin-top: 10vh;
+  margin-top: 5vh;
   margin-bottom: 5vh;
+
+  @media (max-width: 1100px) {
+    margin-top: 2vh;
+    margin-bottom: 2vh;
+  }
+
+  @media (max-width: 700px) {
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+  }
 
   > span {
     margin-top: 8px;
     font-size: 12px;
     color: #666;
+
+    @media (max-width: 1100px) {
+      font-size: 9px;
+    }
   }
 `;
