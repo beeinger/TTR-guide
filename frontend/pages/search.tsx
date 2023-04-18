@@ -103,7 +103,7 @@ const InputContainer = styled.div`
 
 const KeywordInput = styled.input`
   font-size: 1rem;
-  font-family: "Trap";
+  font-weight: 600;
   padding: 8px;
   border-radius: 8px 0px 0px 8px;
   border: 2px solid #00c8f8;
@@ -146,7 +146,7 @@ const Container = styled.div`
   > h1 {
     font-size: 3rem;
     margin-top: -10%;
-    font-family: "TrapBlack";
+    font-weight: 900;
   }
 
   text-align: center;

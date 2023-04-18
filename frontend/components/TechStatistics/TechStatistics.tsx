@@ -55,18 +55,18 @@ const Title = styled.h2`
 const Popularity = styled.h1`
   margin: 0;
   font-size: 3rem;
-  font-family: "TrapBlack";
+  font-weight: 900;
   color: #00c8f8;
 `;
 
 const Count = styled.h3`
   margin-top: -4px;
   font-size: 1rem;
-  font-family: "TrapLight";
+  font-weight: 300;
   opacity: 0.5;
   margin-bottom: 8px;
 
   > b {
-    font-family: "Trap";
+    font-weight: 500;
   }
 `;
