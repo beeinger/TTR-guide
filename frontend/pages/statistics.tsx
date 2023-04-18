@@ -70,33 +70,35 @@ export default function index({
             based on <b>{statistics?.totalJobsCount ?? "-"}</b> job posts
           </span>
         </Position>
-        <Sorting />
+        <Sorting setSorting={setSorting} />
       </Header>
-      <ScrollButton visible={leftVisible} type="left" onClick={scroll(-400)} />
-      <Statistics ref={ref} onScroll={updateVisibilityOfArrows}>
-        {techStatistics.length ? (
-          techStatistics.map((tech) => (
-            <TechStatistic key={tech.tech} tech={tech} maxValues={maxValues} />
-          ))
-        ) : (
-          <NoData>
-            {generation_queued ? (
-              <>
-                <Info>
-                  It seems you are <i>the first</i> to request this data!
-                </Info>
-                <span>
-                  Hang tight, this might take a wile, we are generating it <i>just for you</i>! 🫡
-                </span>
-                <Spinner />
-              </>
-            ) : (
-              "Sorry, we have no data on this yet."
-            )}
-          </NoData>
-        )}
-      </Statistics>
-      <ScrollButton visible={rightVisible} type="right" onClick={scroll(400)} />
+      <div style={{ position: "relative", maxWidth: "100%" }}>
+        <ScrollButton visible={leftVisible} type="left" onClick={scroll(-400)} />
+        <Statistics ref={ref} onScroll={updateVisibilityOfArrows}>
+          {techStatistics.length ? (
+            techStatistics.map((tech) => (
+              <TechStatistic key={tech.tech} tech={tech} maxValues={maxValues} />
+            ))
+          ) : (
+            <NoData>
+              {generation_queued ? (
+                <>
+                  <Info>
+                    It seems you are <i>the first</i> to request this data!
+                  </Info>
+                  <span>
+                    Hang tight, this might take a wile, we are generating it <i>just for you</i>! 🫡
+                  </span>
+                  <Spinner />
+                </>
+              ) : (
+                "Sorry, we have no data on this yet."
+              )}
+            </NoData>
+          )}
+        </Statistics>
+        <ScrollButton visible={rightVisible} type="right" onClick={scroll(400)} />
+      </div>
     </Layout>
   );
 }
@@ -205,9 +207,21 @@ const NoData = styled.div`
 `;
 
 const Header = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 0.5fr 1fr 0.5fr;
+  grid-template-rows: 1fr;
+  grid-template-areas: "date position sorting";
+
+  @media (max-width: 800px) {
+    grid-template-columns: 1fr;
+    //! Until date component is not ready it's not taking space
+    grid-template-rows: 1fr 0.5fr 0fr;
+    grid-template-areas:
+      "position"
+      "sorting"
+      "date";
+  }
+
   width: 100%;
   box-sizing: border-box;
   padding: 0 5vw;
@@ -215,6 +229,8 @@ const Header = styled.div`
 `;
 
 const Position = styled.h1`
+  grid-area: position;
+
   font-size: 4rem;
   font-family: "TrapBlack";
   text-transform: uppercase;
