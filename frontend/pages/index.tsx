@@ -65,9 +65,9 @@ const Buttons = styled.div`
 
   > a {
     font-size: 1.1rem;
-    font-family: "Trap";
     text-decoration: none;
     color: #00c8f8;
+    font-weight: 600;
 
     &:hover {
       text-decoration: underline;
@@ -143,7 +143,7 @@ const Info = styled.p`
 
 const Button = styled.button`
   font-size: 1.5rem;
-  font-family: "Trap";
+  font-weight: 600;
 
   max-width: 50%;
   padding: 16px 32px;
@@ -176,7 +176,7 @@ const Button = styled.button`
 
 const Title = styled.h1`
   font-size: 6rem;
-
+  font-weight: 600;
   max-width: 90%;
 
   /* Phone screen */
@@ -186,13 +186,14 @@ const Title = styled.h1`
   }
 
   > b {
-    font-family: "Trap";
     color: #00c8f8;
+    font-weight: 900;
   }
 `;
 
 const Subtitle = styled.h2`
   font-size: 2rem;
+  font-weight: 400;
 
   max-width: 50%;
 
@@ -202,10 +203,8 @@ const Subtitle = styled.h2`
     max-width: 90%;
   }
 
-  font-family: "TrapLight";
-
   > b {
-    font-family: "Trap";
+    font-weight: 600;
     color: #00c8f8;
   }
 `;

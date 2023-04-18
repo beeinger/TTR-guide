@@ -266,7 +266,7 @@ const ExecuteRequest = styled.div`
     color: #000;
     font-size: 1.2rem;
     cursor: pointer;
-    font-family: "Trap";
+    font-weight: 600;
 
     transition: 0.2s;
 

@@ -121,7 +121,7 @@ const RegeneratingInBg = styled.div`
   justify-content: center;
 
   font-size: 0.8rem;
-  font-family: "TrapSemBd";
+  font-weight: 600;
 
   height: 32px;
 `;
@@ -130,7 +130,7 @@ const Info = styled.span`
   font-size: 1.5rem;
   display: block;
   margin-bottom: 8px;
-  font-family: "TrapSemBd";
+  font-weight: 600;
 `;
 
 const Spinner = styled((props) => (
@@ -240,7 +240,7 @@ const Position = styled.h1`
   grid-area: position;
 
   font-size: 4rem;
-  font-family: "TrapBlack";
+  font-weight: 900;
   text-transform: uppercase;
   margin: 0;
   margin-top: 5vh;
@@ -254,11 +254,11 @@ const Position = styled.h1`
   > span {
     text-transform: none;
     font-size: 1rem;
-    font-family: "TrapLight";
+    font-weight: 300;
     opacity: 0.5;
 
     > b {
-      font-family: "Trap";
+      font-weight: 600;
     }
   }
 `;

@@ -67,13 +67,13 @@ const Median = styled.div`
   > h4 {
     margin: 0;
     font-size: 1.8rem;
-    font-family: "TrapBlack";
+    font-weight: 900;
   }
 
   > span {
     margin-top: -4px;
     font-size: 1rem;
-    font-family: "TrapLight";
+    font-weight: 300;
     opacity: 0.5;
   }
 `;

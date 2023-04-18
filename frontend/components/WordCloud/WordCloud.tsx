@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useRouter } from "next/router";
-import { useLayoutEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import ReactWordcloud from "react-wordcloud";
 
 const words = [
@@ -50,7 +50,7 @@ export default function WordCloud() {
         options={{
           rotationAngles: [0, 0],
           rotations: 0,
-          fontFamily: "TrapBlack",
+          fontWeight: "700",
           fontSizes: [20, 100],
           padding: 8,
           deterministic: true,
@@ -69,6 +69,7 @@ export default function WordCloud() {
         }}
         callbacks={callbacks}
       />
+      <span>Size of the word represent how many job posts of this technology are available.</span>
     </Container>
   );
 }
@@ -83,4 +84,10 @@ const Container = styled.div`
 
   margin-top: 10vh;
   margin-bottom: 5vh;
+
+  > span {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #666;
+  }
 `;

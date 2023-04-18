@@ -69,7 +69,7 @@ const SelectSorting = styled.select`
   padding-right: 30px;
   padding-top: 0.2em;
   font-size: 16px;
-  font-family: "TrapSemBd";
+  font-weight: 600;
   background: transparent;
   appearance: none;
   outline: none;
