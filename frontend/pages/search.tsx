@@ -122,20 +122,19 @@ const KeywordInput = styled.input`
     outline: none;
   }
 
-  /* Phone screen */
-  @media (max-width: 600px) {
-    font-size: 1rem;
+  @media (max-width: 1100px) {
     max-width: 90%;
+    font-size: 0.8rem;
   }
 `;
 
 const Container = styled.div`
-  margin-top: 64px;
+  margin: 64px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 64px);
+  height: calc(100vh - 64px - 64px);
   width: 100vw;
   box-sizing: border-box;
 
@@ -145,8 +144,36 @@ const Container = styled.div`
 
   > h1 {
     font-size: 3rem;
-    margin-top: -10%;
     font-weight: 900;
+    margin-bottom: 0px;
+
+    @media (max-width: 1100px) {
+      font-size: 2rem;
+    }
+
+    @media (max-width: 700px) {
+      font-size: 1.8rem;
+    }
+  }
+
+  > h2 {
+    @media (max-width: 1100px) {
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 700px) {
+      font-size: 1.1rem;
+    }
+  }
+
+  > span {
+    @media (max-width: 1100px) {
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 700px) {
+      font-size: 0.7rem;
+    }
   }
 
   text-align: center;
