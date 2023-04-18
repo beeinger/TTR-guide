@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import styled from "@emotion/styled";
 import { BsArrowRight } from "react-icons/bs";
 import { useRouter } from "next/router";
+import Head from "next/head";
+import { shortTitle } from "./_document";
 
 const WordCloud = dynamic(() => import("components/WordCloud"), { ssr: false });
 
@@ -21,28 +23,33 @@ export default function search() {
   };
 
   return (
-    <Container>
-      <h1>What are you looking for?</h1>
-      <WordCloud />
-      <h2>Looking for something else?</h2>
-      <span>
-        Try searching for keywords separated by comas
-        <br />
-        eg. <b>frontend,backend,fullstack</b>
-        <br />
-        or <b>react,excel,sql</b>
-      </span>
-      <InputContainer>
-        <KeywordInput
-          value={keywords}
-          onChange={handleType}
-          placeholder="Keywords of tools and technologies"
-        />
-        <button onClick={handleSearch}>
-          <BsArrowRight />
-        </button>
-      </InputContainer>
-    </Container>
+    <>
+      <Head>
+        <title>{`Search statistics - ${shortTitle}`}</title>
+      </Head>
+      <Container>
+        <h1>What are you looking for?</h1>
+        <WordCloud />
+        <h2>Looking for something else?</h2>
+        <span>
+          Try searching for keywords separated by comas
+          <br />
+          eg. <b>frontend,backend,fullstack</b>
+          <br />
+          or <b>react,excel,sql</b>
+        </span>
+        <InputContainer>
+          <KeywordInput
+            value={keywords}
+            onChange={handleType}
+            placeholder="Keywords of tools and technologies"
+          />
+          <button onClick={handleSearch}>
+            <BsArrowRight />
+          </button>
+        </InputContainer>
+      </Container>
+    </>
   );
 }
 
@@ -123,11 +130,12 @@ const KeywordInput = styled.input`
 `;
 
 const Container = styled.div`
+  margin-top: 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  height: calc(100vh - 64px);
   width: 100vw;
   box-sizing: border-box;
 
