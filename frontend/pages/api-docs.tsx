@@ -404,6 +404,7 @@ const Blue = styled.span`
 
 const QueryParams = styled.div`
   margin-top: 16px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
