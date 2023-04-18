@@ -158,6 +158,7 @@ export default function Api() {
                 {executing ? "Executing..." : "Execute request"}
               </button>
             </ExecuteRequest>
+            <div style={{ height: "1px", background: "#fff", margin: "1rem 0" }} />
             {response ? (
               <div>
                 <h3>Response:</h3>
@@ -173,6 +174,7 @@ export default function Api() {
                 >
                   {JSON.stringify(response, null, 2)}
                 </SyntaxHighlighter>
+                <div style={{ height: "1px", background: "#fff", margin: "1rem 0" }} />
               </div>
             ) : null}
             <ResponseProperties>
