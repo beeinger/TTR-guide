@@ -17,10 +17,10 @@ export default function useSorting(_techStatistics: TechStatistics[]) {
     filterAndSort(_techStatistics, sortingFunctions[sorting])
   );
 
-  useEffect(
-    () => setTechStatistics(filterAndSort(_techStatistics, sortingFunctions[sorting])),
-    [_techStatistics, sorting]
-  );
+  useEffect(() => {
+    console.log("aaa");
+    setTechStatistics(filterAndSort(_techStatistics, sortingFunctions[sorting]));
+  }, [sorting, _techStatistics]);
 
   return [techStatistics, setSorting] as const;
 }

@@ -13,6 +13,8 @@ import useScroll from "shared/hooks/useScroll";
 import Head from "next/head";
 import { shortTitle } from "./_document";
 
+const defaultArray = [];
+
 export default function index({
   error,
   position,
@@ -23,16 +25,16 @@ export default function index({
   const { scroll, leftVisible, rightVisible, ref, updateVisibilityOfArrows } = useScroll();
 
   useEffect(() => {
-    if (window.localStorage && statistics?.totalJobsCount)
+    if (window?.localStorage && statistics?.totalJobsCount)
       window.localStorage.setItem(position + "Count", statistics.totalJobsCount.toString());
   }, []);
 
   useEffect(() => {
+    let interval: NodeJS.Timer;
     const refreshData = () => router.replace(router.asPath);
-    let timeout: NodeJS.Timeout;
-    if (generation_queued) timeout = setTimeout(refreshData, statistics ? 10_000 : 3_000);
-    return () => clearTimeout(timeout);
-  }, [generation_queued, router]);
+    if (generation_queued) interval = setInterval(refreshData, statistics ? 10_000 : 3_000);
+    return () => clearInterval(interval);
+  }, [generation_queued]);
 
   const maxValues = useMemo(
     () => ({
@@ -50,7 +52,7 @@ export default function index({
     [statistics]
   );
 
-  const [techStatistics, setSorting] = useSorting(statistics?.techStatistics || []);
+  const [techStatistics, setSorting] = useSorting(statistics?.techStatistics || defaultArray);
 
   if (error) return <div>error</div>;
 
@@ -93,8 +95,8 @@ export default function index({
                       It seems you are <i>the first</i> to request this data!
                     </Info>
                     <span>
-                      Hang tight, this might take a wile, we are generating it <i>just for you</i>!
-                      🫡
+                      Hang tight, this might take a wile (up to 15 mins), we are generating it{" "}
+                      <i>just for you</i>! 🫡
                     </span>
                     <Spinner />
                   </>
