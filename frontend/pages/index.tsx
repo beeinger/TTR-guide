@@ -82,7 +82,7 @@ const Buttons = styled.div`
     }
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     flex-direction: column;
     gap: 16px;
     justify-content: center;
@@ -100,7 +100,7 @@ const Container = styled.div`
 
   padding: 0px 64px;
   /* Phone screen */
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     padding: 0px 16px;
   }
 
@@ -116,7 +116,8 @@ const Body = styled.div`
   height: 100%;
 
   width: calc(100% - 128px);
-  @media (max-width: 600px) {
+
+  @media (max-width: 700px) {
     width: calc(100% - 32px);
   }
 `;
@@ -136,7 +137,7 @@ const Info = styled.p`
   }
 
   /* Phone screen */
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     font-size: 0.8rem;
   }
 `;
@@ -168,7 +169,7 @@ const Button = styled.button`
   }
 
   /* Phone screen */
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     font-size: 1rem;
     max-width: 90%;
   }
@@ -178,9 +179,14 @@ const Title = styled.h1`
   font-size: 6rem;
   font-weight: 600;
   max-width: 90%;
+  margin: 16px 0;
+
+  @media (max-width: 1100px) {
+    font-size: 3rem;
+  }
 
   /* Phone screen */
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     font-size: 3.5rem;
     margin-left: -8px;
   }
@@ -192,13 +198,18 @@ const Title = styled.h1`
 `;
 
 const Subtitle = styled.h2`
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 400;
 
-  max-width: 50%;
+  max-width: 70%;
+
+  @media (max-width: 1100px) {
+    font-size: 1.5rem;
+    max-width: 80%;
+  }
 
   /* Phone screen */
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     font-size: 1rem;
     max-width: 90%;
   }
@@ -211,14 +222,14 @@ const Subtitle = styled.h2`
 
 const Footer = styled.footer`
   width: calc(100% - 128px);
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     width: calc(100% - 32px);
   }
 
   font-size: 1rem;
 
   /* Phone screen */
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     font-size: 0.8rem;
   }
 
