@@ -56,7 +56,7 @@ export default function Api() {
       })
       .then((res) => res.data)
       .catch((err) => {
-        console.log(err.response);
+        console.error(err.response);
         return { error: true, message: err.message };
       })
       .finally(() => setExecuting(false));

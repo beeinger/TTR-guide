@@ -18,7 +18,6 @@ export default function useSorting(_techStatistics: TechStatistics[]) {
   );
 
   useEffect(() => {
-    console.log("aaa");
     setTechStatistics(filterAndSort(_techStatistics, sortingFunctions[sorting]));
   }, [sorting, _techStatistics]);
 
