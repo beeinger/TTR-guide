@@ -236,6 +236,8 @@ const Header = styled.div`
   box-sizing: border-box;
   padding: 0 5vw;
   justify-self: flex-start;
+
+  text-align: center;
 `;
 
 const Position = styled.h1`

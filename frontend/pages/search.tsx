@@ -10,17 +10,19 @@ import { shortTitle } from "./_document";
 const WordCloud = dynamic(() => import("components/WordCloud"), { ssr: false });
 
 export default function search() {
+  const router = useRouter();
+
   const [keywords, setKeywords] = React.useState<string>("");
   const handleType = (e: React.ChangeEvent<HTMLInputElement>) => setKeywords(e.target.value);
 
-  const router = useRouter();
   const handleSearch = () => {
-    const query = keywords
-      .split(",")
-      .map((keyword) => keyword.trim())
-      .join(",");
-    router.push(`/statistics` + (query ? `?position=${query}` : ""));
-  };
+      const query = keywords
+        .split(",")
+        .map((keyword) => keyword.trim())
+        .join(",");
+      router.push(`/statistics` + (query ? `?position=${query}` : ""));
+    },
+    handleKeyDown = (event) => event.key === "Enter" && handleSearch();
 
   return (
     <>
@@ -42,6 +44,7 @@ export default function search() {
           <KeywordInput
             value={keywords}
             onChange={handleType}
+            onKeyDown={handleKeyDown}
             placeholder="Keywords of tools and technologies"
           />
           <button onClick={handleSearch}>
