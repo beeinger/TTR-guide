@@ -4,6 +4,23 @@
 
 ### Recorded demo available at: [https://youtu.be/5jQCix0P_fE](https://youtu.be/5jQCix0P_fE)
 
+## Sunset Statement
+
+**Sorry to everyone whose been using it, but as of October 2024 this is now sunset.**
+
+Anyone who wants to use this is free to set it up on their own!
+
+I am sunsetting this due to high costs of DynamoDb on AWS, I'd love to make another iteration of this project in the future, but for now it's not feasible.
+It definitely needs lots of changes, first of all getting rid of DynamoDb, architecture redesign and drastically improving the code quality.
+
+**_Thank you for understanding and sorry for the inconvenience!_**
+
+#### DynamoDB Dump
+
+As this project is sunset I made a dump of all collected data from the DynamoDB database.
+
+It is available in the [`backend/dynamo-db-dump`](https://github.com/beeinger/TTR-guide/tree/develop/backend/dynamo-db-dump) folder.
+
 ## Abstract
 
 The Tools and Technologies Research guide (TTR.guide) project aimed to provide a comprehensive guide to job market analysis and provide valuable insights for both end-users and developers by leveraging the power of natural language processing (NLP) techniques. This open-source project utilised the GPT-3.5 Turbo OpenAI API to extract tools and technologies from job postings. The project followed an Agile methodology, which allowed for continuous iteration and improvement, while careful consideration of ethical, legal, and social aspects related to data handling and user privacy were also prioritised.

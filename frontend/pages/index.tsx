@@ -1,14 +1,8 @@
 import styled from "@emotion/styled";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import { useCallback } from "react";
-import { BsArrowRight, BsGithub, BsHeartFill } from "react-icons/bs";
-import { HiOutlineDocumentChartBar } from "react-icons/hi2";
+import { BsGithub, BsHeartFill } from "react-icons/bs";
 
 export default function IndexPage() {
-  const router = useRouter(),
-    goToSearch = useCallback(() => router.push("/search"), [router.push]);
-
   return (
     <Container>
       <Body>
@@ -16,6 +10,24 @@ export default function IndexPage() {
           <b>T</b>ools and <b>T</b>echnologies <b>R</b>esearch <b>guide</b>
         </Title>
         <div>
+          <Info>
+            <i>🌅 Sunset info:</i> Sorry to everyone whose been using it, but{" "}
+            <b>as of October 2024 this is now sunset.</b>
+            <br />
+            Anyone who wants to use this is free to set it up on their own, here is the{" "}
+            <Link href="https://github.com/beeinger/TTR-guide" target="_blank">
+              <BsGithub />
+              open source GitHub repo.
+            </Link>{" "}
+            <br />
+            I am sunsetting this due to high costs of DynamoDb on AWS, I'd love to make another
+            iteration of this project in the future, but for now it's not feasible.
+            <br />
+            It definitely needs lots of changes, first of all getting rid of DynamoDb, architecture
+            redesign and drastically improving the code quality.
+            <br />
+            <i>Thank you for understanding and sorry for the inconvenience!</i>
+          </Info>
           <Subtitle>
             An all in one platform empowering users with powerful <b>visualisations</b> and{" "}
             <b>analytics</b> for better, <b>informed choices</b> of tools and technologies. Whether
@@ -23,15 +35,6 @@ export default function IndexPage() {
             answers based on <b>data</b> coming straight <b>from job posts</b>, from what the{" "}
             <b>industry</b> requires.
           </Subtitle>
-          <Buttons>
-            <Button onClick={goToSearch}>
-              Start your research <BsArrowRight />
-            </Button>
-            <Link href="/api-docs">
-              <HiOutlineDocumentChartBar />
-              <span>API documentation</span>
-            </Link>
-          </Buttons>
         </div>
         <Info>
           <b>Notice that currently</b> the dataset is limited mostly to programming/engineering and
@@ -52,42 +55,6 @@ export default function IndexPage() {
     </Container>
   );
 }
-
-const Buttons = styled.div`
-  margin-top: 16px;
-
-  display: flex;
-  flex-direction: row;
-  gap: 32px;
-  align-items: center;
-  justify-content: flex-start;
-
-  > a {
-    font-size: 1.1rem;
-    text-decoration: none;
-    color: #00c8f8;
-    font-weight: 600;
-
-    &:hover {
-      text-decoration: underline;
-    }
-
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    > span {
-      margin-bottom: -0.2em;
-    }
-  }
-
-  @media (max-width: 700px) {
-    flex-direction: column;
-    gap: 16px;
-    justify-content: center;
-    align-items: flex-start;
-  }
-`;
 
 const Container = styled.div`
   display: flex;
@@ -139,38 +106,16 @@ const Info = styled.p`
   @media (max-width: 700px) {
     font-size: 0.8rem;
   }
-`;
 
-const Button = styled.button`
-  font-size: 1.5rem;
-  font-weight: 600;
-
-  max-width: 50%;
-  padding: 16px 32px;
-  border-radius: 8px;
-  border: none;
-  background-color: #00c8f8;
-  color: #000;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-
-  cursor: pointer;
-
-  transition: background-color 0.2s ease-in-out;
-  :hover {
-    background-color: #4cd1ff;
-  }
-  :active {
-    background-color: #00c8f8;
+  > a {
+    text-decoration: none;
+    color: #00c8f8;
   }
 
-  /* Phone screen */
-  @media (max-width: 700px) {
-    font-size: 1rem;
-    max-width: 90%;
+  svg {
+    margin: 0 0.25rem;
+    height: 1em;
+    margin-top: -4px;
   }
 `;
 
